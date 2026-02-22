@@ -113,7 +113,7 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
       client.connectionTimeout = const Duration(seconds: 3);
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('drivenet_jwt') ?? '';
-      final req = await client.getUrl(Uri.parse('http://localhost:8000/api/fs/stats'));
+      final req = await client.getUrl(Uri.parse('https://drivenet-broker.onrender.com/api/fs/stats'));
       req.headers.set('Authorization', 'Bearer $token');
       final res = await req.close();
       final body = await res.transform(utf8.decoder).join();
@@ -583,9 +583,9 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
             Row(children: [
               _telemetryCard('CONNECTION', _isOnline ? 'ONLINE' : 'STANDBY', _isOnline ? Colors.greenAccent : Colors.grey, Icons.wifi_tethering),
               const SizedBox(width: 12),
-              _telemetryCard('AGENT NODE', 'LOCALHOST:3001', const Color(0xFFFF4655), Icons.developer_board),
+              _telemetryCard('AGENT NODE', 'NATIVE DART CORE', const Color(0xFFFF4655), Icons.developer_board),
               const SizedBox(width: 12),
-              _telemetryCard('CLOUD API', 'LOCALHOST:8000', const Color(0xFF137FEC), Icons.cloud),
+              _telemetryCard('CLOUD API', 'RENDER.COM', const Color(0xFF137FEC), Icons.cloud),
             ]),
             const SizedBox(height: 16),
             // Active drive info
@@ -607,8 +607,8 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
                   ]),
                   const SizedBox(height: 12),
                   _infoRow('DRIVE PATH', '$_selectedDrive\\'),
-                  _infoRow('ACCESSIBLE AT', 'http://localhost:5173/dashboard'),
-                  _infoRow('BACKEND SOCKET', 'ws://localhost:8000'),
+                  _infoRow('ACCESSIBLE AT', 'https://drivenet.vercel.app/dashboard'),
+                  _infoRow('BACKEND SOCKET', 'wss://drivenet-broker.onrender.com'),
                 ]),
               ),
             const SizedBox(height: 16),
@@ -817,9 +817,9 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
           ]),
           const SizedBox(height: 16),
           _configSection('NETWORK SETTINGS', [
-            _configInfoRow('Backend API URL', 'http://localhost:8000'),
-            _configInfoRow('Local IPC Port', '3001'),
-            _configInfoRow('WebSocket Path', 'ws://localhost:8000'),
+            _configInfoRow('Backend API URL', 'https://drivenet-broker.onrender.com'),
+            _configInfoRow('Local IPC Port', 'N/A (NATIVE DART)'),
+            _configInfoRow('WebSocket Path', 'wss://drivenet-broker.onrender.com'),
             _configInfoRow('Agent ID', 'desktop-node-01'),
           ]),
           const SizedBox(height: 16),
@@ -914,9 +914,9 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
         Text(_isOnline ? 'SECURE_LINK: ACTIVE — $_selectedDrive\\' : 'SECURE_LINK: INACTIVE',
             style: TextStyle(color: _isOnline ? const Color(0xFFFF4655) : Colors.grey[700], fontSize: 9, letterSpacing: 1.0)),
         _div(),
-        Text('NODE: LOCALHOST:3001', style: TextStyle(color: Colors.grey[700], fontSize: 9)),
+        Text('NODE: NATIVE DART CORE', style: TextStyle(color: Colors.grey[700], fontSize: 9)),
         _div(),
-        Text('API: LOCALHOST:8000', style: TextStyle(color: Colors.grey[700], fontSize: 9)),
+        Text('API: RENDER.COM', style: TextStyle(color: Colors.grey[700], fontSize: 9)),
         const Spacer(),
         Text('${DateTime.now().toUtc().toIso8601String().substring(0, 16)} UTC', style: TextStyle(color: Colors.grey[700], fontSize: 9)),
       ]),

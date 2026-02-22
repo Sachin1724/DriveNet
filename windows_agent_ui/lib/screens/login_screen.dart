@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Open the web frontend login page in the browser
       // The web frontend will handle the Google OAuth and save the JWT to localStorage
       // We redirect the user to a special deep-link URL that our local server will intercept
-      final loginUrl = Uri.parse('http://localhost:5173/login?agent=true');
+      final loginUrl = Uri.parse('https://drivenet.vercel.app/login?agent=true');
       await launchUrl(loginUrl, mode: LaunchMode.externalApplication);
 
       setState(() {
