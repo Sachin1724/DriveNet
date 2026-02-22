@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .hero-skew {
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
+  }
+
+  .card-angle {
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
+  }
+
+  .btn-slanted {
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+  }
+
+  .valorant-clip {
+    clip-path: polygon(0 0, 95% 0, 100% 15%, 100% 100%, 5% 100%, 0 85%);
+  }
+
+  .valorant-clip-sm {
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+  }
+
+  .scanline {
+    background: linear-gradient(to bottom, transparent 50%, rgba(255, 71, 87, 0.05) 51%);
+    background-size: 100% 4px;
+  }
+
+  .scanlines {
+    background: linear-gradient(to bottom, rgba(255, 71, 87, 0.03) 50%, rgba(0, 0, 0, 0) 50%);
+    background-size: 100% 4px;
+  }
+
+  .grid-bg {
+    background-image: radial-gradient(circle, #ff4757 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.05;
+  }
+
+  .tech-border {
+    position: relative;
+  }
+
+  .tech-border::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 20px;
+    height: 20px;
+    border-top: 2px solid #ff4757;
+    border-left: 2px solid #ff4757;
+  }
+
+  .tech-border::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-bottom: 2px solid #ff4757;
+    border-right: 2px solid #ff4757;
+  }
+
+  .valorant-slant {
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+  }
+
+  .valorant-slant-reverse {
+    clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+  }
+}
+
+/* Custom Scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f1923;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff4757;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6b81;
+}

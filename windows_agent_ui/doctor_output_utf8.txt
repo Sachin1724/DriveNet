@@ -1,0 +1,47 @@
+﻿[!] Flutter (Channel stable, 3.41.2, on Microsoft Windows [Version 10.0.26200.7840], locale en-US) [1,298ms]
+    ΓÇó Flutter version 3.41.2 on channel stable at C:\Users\sachi\Downloads\flutter_windows_3.41.2-stable\flutter
+    ! The flutter binary is not on your path. Consider adding C:\Users\sachi\Downloads\flutter_windows_3.41.2-stable\flutter\bin to your path.
+    ! The dart binary is not on your path. Consider adding C:\Users\sachi\Downloads\flutter_windows_3.41.2-stable\flutter\bin to your path.
+    ΓÇó Upstream repository https://github.com/flutter/flutter.git
+    ΓÇó Framework revision 90673a4eef (2 days ago), 2026-02-18 13:54:59 -0800
+    ΓÇó Engine revision 6c0baaebf7
+    ΓÇó Dart version 3.11.0
+    ΓÇó DevTools version 2.54.1
+    ΓÇó Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+    ΓÇó If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform update checks and upgrades.
+
+[ΓêÜ] Windows Version (Windows 11 or higher, 25H2, 2009) [2.6s]
+
+[!] Android toolchain - develop for Android devices (Android SDK version 36.1.0) [1,299ms]
+    ΓÇó Android SDK at C:\Users\sachi\AppData\Local\Android\sdk
+    ΓÇó Emulator version 36.3.10.0 (build_id 14472402) (CL:N/A)
+    X cmdline-tools component is missing.
+      Try installing or updating Android Studio.
+      Alternatively, download the tools from https://developer.android.com/studio#command-line-tools-only and make sure to set the ANDROID_HOME environment variable.
+      See https://developer.android.com/studio/command-line for more details.
+    X Android license status unknown.
+      Run `flutter doctor --android-licenses` to accept the SDK licenses.
+      See https://flutter.dev/to/windows-android-setup for more details.
+
+[ΓêÜ] Chrome - develop for the web [617ms]
+    ΓÇó Chrome at C:\Program Files\Google\Chrome\Application\chrome.exe
+
+[!] Visual Studio - develop Windows apps (Visual Studio Community 2026 18.3.1) [614ms]
+    ΓÇó Visual Studio at C:\Program Files\Microsoft Visual Studio\18\Community
+    ΓÇó Visual Studio Community 2026 version 18.3.11512.155
+    ΓÇó Windows 10 SDK version 10.0.22621.0
+    X Visual Studio is missing necessary components. Please re-run the Visual Studio installer for the "Desktop development with C++" workload, and include these components:
+        MSVC v142 - VS 2019 C++ x64/x86 build tools
+         - If there are multiple build tool versions available, install the latest
+        C++ CMake tools for Windows
+        Windows 10 SDK
+
+[ΓêÜ] Connected device (3 available) [625ms]
+    ΓÇó Windows (desktop) ΓÇó windows ΓÇó windows-x64    ΓÇó Microsoft Windows [Version 10.0.26200.7840]
+    ΓÇó Chrome (web)      ΓÇó chrome  ΓÇó web-javascript ΓÇó Google Chrome 145.0.7632.109
+    ΓÇó Edge (web)        ΓÇó edge    ΓÇó web-javascript ΓÇó Microsoft Edge 145.0.3800.65
+
+[ΓêÜ] Network resources [1,793ms]
+    ΓÇó All expected network resources are available.
+
+! Doctor found issues in 3 categories.

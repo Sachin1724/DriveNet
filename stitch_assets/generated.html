@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CloudDrive Manager - File Preview</title>
+<!-- Google Fonts: Space Grotesk for that tactical feel -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'tactical-red': '#ff4757',
+            'tactical-dark': '#0b0b0d',
+            'tactical-gray': '#1a1a1e',
+            'tactical-border': '#2d2d32',
+          },
+          fontFamily: {
+            sans: ['Space Grotesk', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-effects">
+    /* Scanline Effect */
+    .scanlines {
+      position: relative;
+      overflow: hidden;
+    }
+    .scanlines::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.1) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Grid Background */
+    .grid-bg {
+      background-image: 
+        linear-gradient(to right, rgba(255, 71, 87, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 71, 87, 0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* Angled Corners for tactical look */
+    .angled-box {
+      clip-path: polygon(
+        0 0, 
+        calc(100% - 20px) 0, 100% 20px, 
+        100% 100%, 
+        20px 100%, 0 calc(100% - 20px)
+      );
+    }
+
+    /* Glitch/Glow animation */
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 5px rgba(255, 71, 87, 0.2); }
+      50% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.5); }
+    }
+    .glow-border {
+      border: 1px solid #ff4757;
+      animation: pulse-red 2s infinite;
+    }
+
+    /* Scrolling Marquee */
+    .marquee {
+      white-space: nowrap;
+      overflow: hidden;
+      display: inline-block;
+      animation: marquee 20s linear infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body class="bg-tactical-dark text-white font-sans selection:bg-tactical-red selection:text-white h-screen overflow-hidden flex flex-col grid-bg">
+<!-- BEGIN: Header -->
+<header class="h-16 border-b border-tactical-border bg-tactical-dark/80 backdrop-blur-md flex items-center justify-between px-8 z-50" data-purpose="main-header">
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 bg-tactical-red flex items-center justify-center font-bold italic">C</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter uppercase italic">
+          CloudDrive <span class="text-tactical-red">Manager</span>
+</h1>
+<p class="text-[10px] text-gray-500 tracking-widest leading-none">V4.0.2 // GLOBAL DEPLOYMENT</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="text-right">
+<h2 class="text-sm font-bold tracking-widest text-tactical-red italic">FILE_PREVIEW // PROTOCOL_04</h2>
+<p class="text-[10px] text-gray-400">STATUS: AUTHORIZED_VIEW_ONLY</p>
+</div>
+<button class="bg-tactical-red hover:bg-red-500 transition-colors px-4 py-1.5 text-xs font-bold uppercase italic skew-x-[-12deg]">
+<span class="inline-block skew-x-[12deg]">Close Preview</span>
+</button>
+</div>
+</header>
+<!-- END: Header -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 flex overflow-hidden p-6 gap-6" data-purpose="preview-workspace">
+<!-- Left: Preview Window -->
+<section class="flex-1 relative flex flex-col" data-purpose="document-preview-container">
+<div class="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-tactical-red"></div>
+<div class="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-tactical-red"></div>
+<div class="flex-1 bg-tactical-gray border border-tactical-border angled-box flex flex-col scanlines relative">
+<!-- Preview Header Info -->
+<div class="p-4 border-b border-tactical-border flex justify-between items-center bg-tactical-dark/40">
+<span class="text-[10px] text-tactical-red font-bold uppercase tracking-widest">LIVE_RENDER_VIEWPORT</span>
+<div class="flex gap-2">
+<div class="w-2 h-2 bg-tactical-red rounded-full animate-pulse"></div>
+<span class="text-[10px] text-gray-400 uppercase">Buffer: 100%</span>
+</div>
+</div>
+<!-- Document Content -->
+<div class="flex-1 p-8 overflow-auto flex justify-center items-start bg-black/20">
+<!-- Mockup of a Technical PDF -->
+<article class="w-full max-w-2xl bg-white text-black p-12 shadow-2xl relative" data-purpose="pdf-mockup">
+<div class="absolute top-0 right-0 p-4 opacity-50">
+<p class="text-xs font-bold border-2 border-black p-1">CONFIDENTIAL</p>
+</div>
+<header class="border-b-2 border-black pb-4 mb-8">
+<h3 class="text-2xl font-bold uppercase tracking-tight">Mission Report: Sector 7</h3>
+<p class="text-sm font-medium">Internal Reference: PROTOCOL_V2_FINAL</p>
+</header>
+<div class="space-y-6 text-sm leading-relaxed">
+<section>
+<h4 class="font-bold underline uppercase mb-2">1. Objective</h4>
+<p>Establishing a persistent uplink within the A-North Cluster to ensure continuous data flow for the tactical storage protocol. Security level must remain at AES-256 standards throughout the duration of the deployment.</p>
+</section>
+<section>
+<h4 class="font-bold underline uppercase mb-2">2. Deployment Details</h4>
+<p>Hardware ID: 8829-QX-92 has been designated as the primary gateway. Latency metrics indicate a stable 12ms connection across all internal nodes.</p>
+<div class="mt-4 p-4 bg-gray-100 border-l-4 border-black font-mono text-xs">
+                  DECRYPT_KEY: [REDACTED]<br/>
+                  AUTH_LEVEL: RADIANT_01<br/>
+                  UPLINK: STABLE
+                </div>
+</section>
+<section>
+<h4 class="font-bold underline uppercase mb-2">3. Visual Data Analysis</h4>
+<!-- Placeholder for Image inside PDF -->
+<div class="w-full h-48 bg-gray-200 border border-gray-300 flex items-center justify-center overflow-hidden">
+<img alt="Technical Document Illustration" class="w-full h-full object-cover grayscale opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxu9XaKUmFOGgVqDANOi_hfUbQ20gj9vCqhxkrdexcZ4-rg6XR5Fc00RdRkV2jOoYQJgCaUbMQDReSOlCf9d0NN3jVC0kV0ViLkfKwqm1D5D7_Ch9ViXZUHr-_JA7z0nY1llAYHYbYDnqhXLbgM0bzwXR_EfmV4NneVP503AU_S5H49Sf3UsjuZVeSE6201ZqrQGjJIO9Fm1oI9fveKyMVXqZRAlbHVm9iQIhhqekrHU90A9nev2kM1D0gpB1ZJn83zXXoEaQJDqoQ"/>
+</div>
+</section>
+</div>
+<footer class="mt-12 pt-4 border-t border-gray-200 text-[10px] flex justify-between uppercase font-bold text-gray-400">
+<span>Page 1 of 42</span>
+<span>Generated: 2023-11-24 // 14:22:01</span>
+</footer>
+</article>
+</div>
+<!-- Zoom/Nav Controls -->
+<div class="p-3 border-t border-tactical-border flex justify-center gap-4 bg-tactical-dark/60">
+<button class="text-[10px] text-gray-400 hover:text-white uppercase font-bold tracking-widest">[ Zoom_In ]</button>
+<button class="text-[10px] text-gray-400 hover:text-white uppercase font-bold tracking-widest">[ Zoom_Out ]</button>
+<button class="text-[10px] text-gray-400 hover:text-white uppercase font-bold tracking-widest">[ Rotate ]</button>
+</div>
+</div>
+</section>
+<!-- Right: Metadata Sidebar -->
+<aside class="w-80 flex flex-col gap-6" data-purpose="metadata-panel">
+<!-- File Info Card -->
+<div class="bg-tactical-gray border border-tactical-border p-5 flex flex-col gap-4 glow-border">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-tactical-red/10 border border-tactical-red/30">
+<svg class="w-6 h-6 text-tactical-red" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<h3 class="text-xs text-gray-500 uppercase font-bold tracking-wider">Metadata_Source</h3>
+<p class="text-sm font-bold truncate">MISSION_REPORT_V2.PDF</p>
+</div>
+</div>
+<div class="space-y-4 py-4 border-y border-tactical-border/50">
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 uppercase font-bold">Filesize</span>
+<span class="text-xs font-bold tracking-tighter">1.2 MB</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 uppercase font-bold">Security</span>
+<span class="text-[10px] bg-tactical-red text-white px-2 py-0.5 font-bold italic">ENCRYPTED</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 uppercase font-bold">Owner</span>
+<span class="text-xs font-bold text-tactical-red">CYPHER_01</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-gray-500 uppercase font-bold">Accessed</span>
+<span class="text-[10px] font-mono">2023.11.24 // 14:22</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 mt-2">
+<button class="w-full bg-white text-black py-2 text-xs font-bold uppercase italic hover:bg-gray-200 transition-colors">Download Data</button>
+<div class="flex gap-2">
+<button class="flex-1 border border-tactical-border bg-tactical-dark hover:bg-tactical-gray py-2 text-[10px] font-bold uppercase italic transition-colors">Share</button>
+<button class="flex-1 border border-tactical-red text-tactical-red hover:bg-tactical-red hover:text-white py-2 text-[10px] font-bold uppercase italic transition-colors">Delete</button>
+</div>
+</div>
+</div>
+<!-- Access Log -->
+<div class="bg-tactical-gray/50 border border-tactical-border p-4 flex-1 overflow-hidden flex flex-col">
+<h4 class="text-[10px] text-gray-500 font-bold uppercase mb-3 tracking-widest flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-tactical-red"></span> Access_Log
+        </h4>
+<div class="flex-1 overflow-auto font-mono text-[9px] text-gray-400 space-y-2">
+<p class="text-tactical-red">[14:21:05] ACCESS_GRANTED: ADMIN</p>
+<p>[14:15:33] DECRYPTION_INITIATED</p>
+<p>[13:55:12] FILE_LOCKED_FOR_READ</p>
+<p>[12:02:44] SYNC_COMPLETE: NODE_04</p>
+<p class="opacity-40">[11:45:00] NODE_PING_RECEIVED</p>
+<p class="opacity-40">[11:40:00] AUTO_SCAN_CLEARED</p>
+</div>
+</div>
+</aside>
+</main>
+<!-- END: Main Content Area -->
+<!-- BEGIN: Footer Status Bar -->
+<footer class="h-8 bg-tactical-red text-black flex items-center overflow-hidden" data-purpose="status-footer">
+<div class="px-4 h-full bg-black text-tactical-red flex items-center font-bold text-[10px] uppercase italic tracking-tighter border-r border-tactical-red shrink-0">
+      SYSTEM_STATUS
+    </div>
+<div class="flex-1 marquee text-[10px] font-bold uppercase tracking-[0.2em] italic">
+      DECRYPTING DATA STREAM... // UPLINK STABLE 12MS // AES-256 ACTIVE // AUTHORIZED ACCESS ONLY // SYNCING TO CLOUD_DRIVE_SERVER_01...
+    </div>
+<div class="px-4 h-full bg-black text-white flex items-center font-bold text-[10px] uppercase italic tracking-tighter border-l border-tactical-red shrink-0 gap-3">
+<span class="animate-pulse">● LIVE</span>
+<span class="text-tactical-red">82% LOAD</span>
+</div>
+</footer>
+<!-- END: Footer Status Bar -->
+</body></html><!-- MISSING_IMAGES:
+- Technical document illustration for within the PDF preview.
+-->

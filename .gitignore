@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Build outputs
+frontend/dist/
+backend/dist/
+windows_agent_ui/build/
+windows_agent_ui/.dart_tool/
+windows_agent_ui/.flutter-plugins
+windows_agent_ui/.flutter-plugins-dependencies
+
+# Environment secrets (CRITICAL)
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

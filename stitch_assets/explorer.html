@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CloudDrive Manager - Tactical Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff4757",
+                        "background-light": "#f8f5f6",
+                        "background-dark": "#121212",
+                        "charcoal-accent": "#1e1e1e",
+                        "neon-green": "#00ff9d",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .valorant-slant {
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+        }
+        .valorant-slant-reverse {
+            clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0.03) 50%, transparent 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 bg-charcoal-accent dark:bg-charcoal-accent border-r border-primary/20 flex flex-col justify-between">
+<div>
+<!-- Branding -->
+<div class="p-6 border-b border-primary/10">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-2 h-8 bg-primary"></div>
+<h2 class="text-xl font-bold uppercase tracking-tighter">Protocol: CLOUD</h2>
+</div>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest leading-none">Status: Active / Sector 7</p>
+</div>
+<!-- Navigation -->
+<nav class="p-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary text-white font-bold valorant-slant" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="uppercase tracking-wide text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary" href="#">
+<span class="material-symbols-outlined text-slate-400">folder_open</span>
+<span class="uppercase tracking-wide text-sm">All Files</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary" href="#">
+<span class="material-symbols-outlined text-slate-400">history</span>
+<span class="uppercase tracking-wide text-sm">Recent Activity</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary" href="#">
+<span class="material-symbols-outlined text-slate-400">share</span>
+<span class="uppercase tracking-wide text-sm">Shared Comms</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary" href="#">
+<span class="material-symbols-outlined text-slate-400">delete</span>
+<span class="uppercase tracking-wide text-sm">Purge Bin</span>
+</a>
+</nav>
+</div>
+<!-- User Profile (Agent) -->
+<div class="p-6 bg-black/30 border-t border-primary/10">
+<div class="flex items-center gap-3">
+<div class="relative">
+<div class="size-12 bg-cover bg-center border-2 border-primary" data-alt="Tactical user agent portrait profile" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBJgcuROvhufGrbdQCDua-Gw-lOg_zk52X0ervzW_yyyfcfHP42TAcYz5tXo36naYa7GT8divZlx5972io2KDIHp81mMPfn_PhOu1Go3DYkPr3sHSx3Z6km0bEaTzEjt7-FPMhqY9vWc8qhBMudupaI1QOvNcNP-OvZusfbXvGSCQg3J5WSY-jbePsrXTry_mWCYOChBbrIYTcASniN9SWQfw3ch8SHSRtyLiVK5Z5w2BRayml7UHE2ewQjyS_V0qP-NqbZijLLleuF')"></div>
+<div class="absolute -bottom-1 -right-1 size-3 bg-neon-green rounded-full border-2 border-charcoal-accent"></div>
+</div>
+<div>
+<p class="text-xs text-slate-400 font-medium uppercase tracking-widest">Agent_Admin</p>
+<p class="text-sm font-bold text-primary italic uppercase leading-none">Rank: Radiant</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-y-auto relative">
+<div class="absolute inset-0 pointer-events-none opacity-10 scanline"></div>
+<!-- Header Section -->
+<header class="p-8 border-b border-white/5 flex flex-wrap justify-between items-end gap-6 relative z-10">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<h1 class="text-5xl font-black italic uppercase tracking-tighter text-slate-100">
+                            CloudDrive <span class="text-primary">Manager</span>
+</h1>
+<span class="px-2 py-1 bg-neon-green/20 text-neon-green text-[10px] font-bold uppercase tracking-widest h-fit mt-2 rounded-sm border border-neon-green/30">
+                            Status: Synced
+                        </span>
+</div>
+<p class="text-slate-400 font-light tracking-[0.2em] uppercase text-xs">Tactical Storage Protocol v4.0.2 // Global Deployment</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-primary text-white px-8 py-3 font-black uppercase italic tracking-widest neon-glow hover:scale-105 transition-transform valorant-slant-reverse flex items-center gap-2">
+<span class="material-symbols-outlined">upload</span>
+<span>Upload Data</span>
+</button>
+</div>
+</header>
+<!-- Action Toolbar & Stats -->
+<section class="p-8 pb-4 space-y-6 relative z-10">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-charcoal-accent/50 p-6 border-r-4 border-primary/50 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 text-primary/20">
+<span class="material-symbols-outlined text-4xl">storage</span>
+</div>
+<p class="text-xs uppercase tracking-widest text-slate-500 mb-1">Storage Capacity</p>
+<p class="text-3xl font-bold">842.5 <span class="text-sm text-slate-500 font-normal tracking-normal">GB Used</span></p>
+<div class="w-full bg-slate-800 h-1 mt-4">
+<div class="bg-primary h-full" style="width: 82%"></div>
+</div>
+</div>
+<div class="bg-charcoal-accent/50 p-6 border-r-4 border-neon-green/50 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 text-neon-green/20">
+<span class="material-symbols-outlined text-4xl">cloud_sync</span>
+</div>
+<p class="text-xs uppercase tracking-widest text-slate-500 mb-1">Sync Frequency</p>
+<p class="text-3xl font-bold">120 <span class="text-sm text-slate-500 font-normal tracking-normal">ms / Realtime</span></p>
+<p class="text-neon-green text-xs font-bold mt-4 uppercase tracking-tighter">Optimal Connection State</p>
+</div>
+<div class="bg-charcoal-accent/50 p-6 border-r-4 border-slate-500/50 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 text-white/5">
+<span class="material-symbols-outlined text-4xl">shield</span>
+</div>
+<p class="text-xs uppercase tracking-widest text-slate-500 mb-1">Encrypted Logs</p>
+<p class="text-3xl font-bold">14.2k <span class="text-sm text-slate-500 font-normal tracking-normal">Entries</span></p>
+<p class="text-slate-400 text-xs mt-4 uppercase tracking-tighter">Security Level: High</p>
+</div>
+</div>
+<!-- Filters & Search -->
+<div class="flex flex-col md:flex-row gap-4 items-center bg-charcoal-accent p-3 border border-white/10">
+<div class="relative flex-1 w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-primary">search</span>
+<input class="w-full bg-black/40 border-none pl-12 focus:ring-1 focus:ring-primary text-sm uppercase tracking-widest placeholder:text-slate-600 italic" placeholder="SCANNING FOR FILES..." type="text"/>
+</div>
+<div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+<button class="px-4 py-2 bg-white/5 hover:bg-primary/20 hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-widest border border-white/10 whitespace-nowrap">Images</button>
+<button class="px-4 py-2 bg-white/5 hover:bg-primary/20 hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-widest border border-white/10 whitespace-nowrap">Archives</button>
+<button class="px-4 py-2 bg-white/5 hover:bg-primary/20 hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-widest border border-white/10 whitespace-nowrap">Media</button>
+<button class="px-4 py-2 bg-white/5 hover:bg-primary/20 hover:text-primary transition-colors text-[10px] font-bold uppercase tracking-widest border border-white/10 whitespace-nowrap">Docs</button>
+</div>
+</div>
+</section>
+<!-- File Table -->
+<section class="p-8 pt-0 relative z-10">
+<div class="border border-white/10 overflow-hidden">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-charcoal-accent border-b border-white/20">
+<th class="px-6 py-4 text-[10px] uppercase tracking-[0.3em] font-black text-slate-500">Resource Name</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-[0.3em] font-black text-slate-500">Last Accessed</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-[0.3em] font-black text-slate-500">Capacity</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-[0.3em] font-black text-slate-500">Security State</th>
+<th class="px-6 py-4 text-[10px] uppercase tracking-[0.3em] font-black text-slate-500 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="hover:bg-white/5 group transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">description</span>
+<span class="text-sm font-bold tracking-wide uppercase">Mission_Brief_Final.pdf</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400 uppercase tracking-tighter">2023-11-24 // 14:22:01</td>
+<td class="px-6 py-4 text-xs font-bold uppercase">12.4 MB</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-2 text-[10px] font-bold text-neon-green uppercase tracking-widest">
+<span class="size-1.5 bg-neon-green rounded-full shadow-[0_0_5px_#00ff9d]"></span>
+                                        Synced
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/5 group transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">image</span>
+<span class="text-sm font-bold tracking-wide uppercase">Agent_Render_HighRes.png</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400 uppercase tracking-tighter">2023-11-23 // 09:15:44</td>
+<td class="px-6 py-4 text-xs font-bold uppercase">45.8 MB</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-2 text-[10px] font-bold text-neon-green uppercase tracking-widest">
+<span class="size-1.5 bg-neon-green rounded-full shadow-[0_0_5px_#00ff9d]"></span>
+                                        Synced
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/5 group transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">folder_zip</span>
+<span class="text-sm font-bold tracking-wide uppercase">Telemetry_Dump_2023.zip</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400 uppercase tracking-tighter">2023-11-22 // 23:59:59</td>
+<td class="px-6 py-4 text-xs font-bold uppercase">1.2 GB</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest">
+<span class="size-1.5 bg-primary rounded-full shadow-[0_0_5px_#ff4757]"></span>
+                                        Pending
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/5 group transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">videocam</span>
+<span class="text-sm font-bold tracking-wide uppercase">Round_Capture_01.mp4</span>
+</td>
+<td class="px-6 py-4 text-xs font-mono text-slate-400 uppercase tracking-tighter">2023-11-20 // 18:04:12</td>
+<td class="px-6 py-4 text-xs font-bold uppercase">254 MB</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-2 text-[10px] font-bold text-neon-green uppercase tracking-widest">
+<span class="size-1.5 bg-neon-green rounded-full shadow-[0_0_5px_#00ff9d]"></span>
+                                        Synced
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Decorative Slants -->
+<div class="mt-8 flex justify-between">
+<div class="h-10 w-32 bg-primary/10 valorant-slant border-l border-primary"></div>
+<div class="flex gap-4">
+<div class="size-2 bg-primary/40"></div>
+<div class="size-2 bg-primary/30"></div>
+<div class="size-2 bg-primary/20"></div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Decorative Corner Elements -->
+<div class="fixed top-0 right-0 p-4 pointer-events-none opacity-50">
+<p class="text-[8px] font-mono tracking-widest text-slate-500 uppercase rotate-90 origin-top-right">System Control Layer // Authorization Required</p>
+</div>
+<div class="fixed bottom-0 left-0 p-4 pointer-events-none opacity-50">
+<p class="text-[8px] font-mono tracking-widest text-slate-500 uppercase">Hardware ID: 8829-QX-92 // Latency 0ms</p>
+</div>
+</body></html>

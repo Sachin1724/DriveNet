@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CLOUD V2.0 | Tactical USB Cloud Infrastructure</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff4757",
+                        "background-light": "#f8f5f6",
+                        "background-dark": "#0f1923",
+                        "surface-dark": "#172535",
+                        "accent-dark": "#2a3e52"
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.375rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .hero-skew {
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
+        }
+        .card-angle {
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
+        }
+        .btn-slanted {
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+        }
+        .scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(255, 71, 87, 0.05) 51%);
+            background-size: 100% 4px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 overflow-x-hidden selection:bg-primary selection:text-white">
+<!-- Tactical Scanline Overlay -->
+<div class="fixed inset-0 pointer-events-none scanline opacity-30 z-50"></div>
+<div class="relative flex min-h-screen flex-col">
+<!-- Navigation -->
+<header class="sticky top-0 z-40 w-full border-b border-primary/20 bg-background-dark/80 backdrop-blur-md px-6 lg:px-20 py-4">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="p-1 border-2 border-primary rotate-45">
+<span class="material-symbols-outlined text-primary -rotate-45 block text-2xl">grid_view</span>
+</div>
+<h2 class="text-2xl font-black tracking-tighter italic">CLOUD <span class="text-primary font-light">V2.0</span></h2>
+</div>
+<nav class="hidden md:flex items-center gap-10">
+<a class="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors" href="#">Features</a>
+<a class="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors" href="#">Security</a>
+<a class="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors" href="#">Pricing</a>
+<a class="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors" href="#">Docs</a>
+</nav>
+<div class="flex items-center gap-6">
+<button class="bg-primary text-white px-8 py-2 font-black italic tracking-widest text-sm btn-slanted hover:brightness-110 transition-all active:scale-95">
+                        DEPLOY NOW
+                    </button>
+<div class="size-10 rounded-lg border border-primary/30 p-0.5 bg-surface-dark overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar technical dashboard icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALFs0-rvdCu4qz6T9R7HcqtKi9IrxJAogO6e0Qaeppk0qDJpS50l0bBXMFGETl6ZAchW6TFz8oT2jxnzc8c69fNBkeaHGIBjE2NK8pcT-XlBEgTjXX99s8T1iRAJnn9G_ZGQ0ccpw58GGj1c6SssUJb2KjPabGtp6KRxXJkJPQxEVqnaQIdjxOQtchks1Qo6FE5i_F7YgNNVd-ZmTfx20XGDbHNZN9-RIsWIMf8uY6egsZDBRr3OZZFStFZyz3s0tSC4LeyQDrSC5W"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1">
+<!-- Hero Section -->
+<section class="relative pt-20 pb-40 px-6 lg:px-20 overflow-hidden bg-background-dark">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/20 to-transparent skew-x-12"></div>
+</div>
+<div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center relative z-10">
+<div class="flex flex-col gap-8">
+<!-- Tactical Tag -->
+<div class="inline-flex items-center">
+<span class="bg-primary text-white text-[10px] font-black px-3 py-1 tracking-[0.3em] uppercase italic flex items-center gap-2">
+<span class="size-1.5 bg-white rounded-full animate-pulse"></span>
+                                V2.0 NOW AVAILABLE
+                            </span>
+</div>
+<h1 class="text-6xl md:text-8xl font-black italic tracking-tighter leading-[0.9] uppercase text-slate-100">
+                            Turn Any USB <br/> Drive into a <br/> <span class="text-primary">Global Cloud</span>
+</h1>
+<p class="text-slate-400 text-lg max-w-lg font-medium leading-relaxed border-l-2 border-primary/40 pl-6 uppercase tracking-wider text-sm">
+                            Experience the evolution of portable cloud infrastructure with tactical-grade encryption and global access. Deploy instantly from any terminal.
+                        </p>
+<div class="flex flex-wrap gap-4 pt-4">
+<button class="group relative px-10 py-4 bg-primary text-white font-black italic tracking-widest btn-slanted overflow-hidden transition-all hover:pr-14">
+<span class="relative z-10">DEPLOY NOW</span>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-xl">bolt</span>
+</button>
+<button class="px-10 py-4 border-2 border-slate-700 hover:border-primary text-slate-300 hover:text-white font-black italic tracking-widest transition-all">
+                                VIEW SPECS
+                            </button>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-4 bg-primary/10 blur-3xl rounded-full group-hover:bg-primary/20 transition-all duration-700"></div>
+<div class="relative aspect-video rounded-lg overflow-hidden border-2 border-primary/20 bg-surface-dark group-hover:border-primary/50 transition-all">
+<img class="w-full h-full object-cover grayscale contrast-125 brightness-75 group-hover:grayscale-0 transition-all duration-700" data-alt="High tech tactical USB drive glowing with digital red data streams" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7YfZOA1MIGMeS-d90AigEyxvlE3dNRchkKk_Fp5MCr6fsSVZrJp8G5uUHv0EIHnYa-YT1umy21nGkkWYVUr1P8GsMMrks-ekX914InqJ8hImcxyJA4-crpk2hFltFAMZnxux3YHEthb-TPFODjr6pWyVPARliC__qs0_lDOyH3W7tR1EsnDcVj9xL0pNuDfpR4IdV9crum9KulEcBYbpGcYzswRONbwu0NmMg0K9m0im6pre0hxHprZ2NdIEHM7V0C4VOK_Xsb3G0"/>
+<div class="absolute top-4 left-4 flex gap-2">
+<div class="w-2 h-2 bg-primary animate-ping"></div>
+<span class="text-[10px] text-primary font-bold tracking-tighter">ESTABLISHING UPLINK...</span>
+</div>
+<div class="absolute bottom-4 right-4 text-primary">
+<span class="material-symbols-outlined text-4xl">security</span>
+</div>
+</div>
+<!-- HUD Accents -->
+<div class="absolute -top-4 -right-4 size-16 border-t-2 border-r-2 border-primary/40"></div>
+<div class="absolute -bottom-4 -left-4 size-16 border-b-2 border-l-2 border-primary/40"></div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="relative bg-surface-dark py-32 px-6 lg:px-20 -mt-10 hero-skew">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col gap-4 mb-20">
+<div class="flex items-center gap-4">
+<h2 class="text-primary text-sm font-black tracking-[0.5em] uppercase">SYSTEM CAPABILITIES</h2>
+<div class="h-[1px] flex-1 bg-gradient-to-r from-primary/40 to-transparent"></div>
+</div>
+<h3 class="text-4xl md:text-6xl font-black italic uppercase tracking-tighter text-white">ELITE PERFORMANCE</h3>
+</div>
+<div class="grid md:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="group relative p-8 bg-background-dark border-r-2 border-b-2 border-slate-800 hover:border-primary card-angle transition-all duration-300">
+<div class="mb-6 inline-flex size-14 items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl">lock</span>
+</div>
+<h4 class="text-xl font-black italic uppercase mb-4 text-white tracking-tight">Tactical Security</h4>
+<p class="text-slate-400 font-medium leading-relaxed text-sm group-hover:text-slate-200 transition-colors">
+                                Military-grade AES-256 encryption protecting every byte of your data with active breach countermeasures.
+                            </p>
+<div class="mt-8 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all">
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase">Encrypted // Active</span>
+<span class="material-symbols-outlined text-primary text-sm">shield</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative p-8 bg-background-dark border-r-2 border-b-2 border-slate-800 hover:border-primary card-angle transition-all duration-300">
+<div class="mb-6 inline-flex size-14 items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</div>
+<h4 class="text-xl font-black italic uppercase mb-4 text-white tracking-tight">Ultra-Speed</h4>
+<p class="text-slate-400 font-medium leading-relaxed text-sm group-hover:text-slate-200 transition-colors">
+                                Proprietary data transfer protocols for lightning-fast synchronization across the global server mesh.
+                            </p>
+<div class="mt-8 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all">
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase">Transfer // Syncing</span>
+<span class="material-symbols-outlined text-primary text-sm">speed</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative p-8 bg-background-dark border-r-2 border-b-2 border-slate-800 hover:border-primary card-angle transition-all duration-300">
+<div class="mb-6 inline-flex size-14 items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-3xl">public</span>
+</div>
+<h4 class="text-xl font-black italic uppercase mb-4 text-white tracking-tight">Global Portability</h4>
+<p class="text-slate-400 font-medium leading-relaxed text-sm group-hover:text-slate-200 transition-colors">
+                                Plug into any terminal globally and access your persistent workspace instantly with zero configuration.
+                            </p>
+<div class="mt-8 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all">
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase">Node // Connected</span>
+<span class="material-symbols-outlined text-primary text-sm">hub</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Status Section -->
+<section class="py-24 px-6 lg:px-20 bg-background-dark">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12 bg-surface-dark p-1 rounded-xl border border-primary/20">
+<div class="flex-1 p-10">
+<h2 class="text-4xl font-black italic uppercase text-white mb-6 tracking-tight">
+                            DEPLOY YOUR <span class="text-primary">INFRASTRUCTURE</span>
+</h2>
+<p class="text-slate-400 max-w-md mb-8">
+                            Ready to transform your physical storage into a high-security global cloud node? The V2.0 protocols are ready for initialization.
+                        </p>
+<div class="flex gap-4">
+<button class="bg-primary text-white px-10 py-4 font-black italic tracking-widest btn-slanted">
+                                START INITIALIZATION
+                            </button>
+</div>
+</div>
+<div class="flex-1 w-full h-80 relative overflow-hidden rounded-lg">
+<img class="w-full h-full object-cover opacity-40 contrast-150 grayscale" data-alt="Cybernetic world map with red glowing data connection points" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtM7BjEqrfX--Y_kVUD4O5aInEDtMlAsdBuslfk5izpIa_zS0RNSM9PzLsiVw0hu3NJOeY0E77qvsMY0ZxNWAuVNlzzUZnpjXslUWgk8Uph20NYmgrAYIM1uYCj0UgdcNwF2HtwFuWsfwHSopzroDCVo9Zzld72m0hn_bLyie3Kn2CRqZhbs_LhNlhIieT1HserZCdG8uf3FHhDwN8z4cMhIRZ3hVtqFXZmlQO4BPF2y60jUggEoBJDgPdogdYCmSJyBgvVEcaeGqT"/>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-dark via-transparent to-transparent"></div>
+<!-- Animated Scanning Bar -->
+<div class="absolute top-0 left-0 w-full h-1 bg-primary/50 shadow-[0_0_15px_rgba(255,71,87,0.8)] animate-bounce" style="animation-duration: 4s;"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-background-dark border-t border-slate-800 py-20 px-6 lg:px-20">
+<div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
+<div class="col-span-2">
+<div class="flex items-center gap-3 mb-8">
+<div class="p-1 border-2 border-primary rotate-45">
+<span class="material-symbols-outlined text-primary -rotate-45 block text-xl">grid_view</span>
+</div>
+<h2 class="text-xl font-black tracking-tighter italic">CLOUD <span class="text-primary font-light">V2.0</span></h2>
+</div>
+<p class="text-slate-500 max-w-sm text-sm uppercase font-bold tracking-widest leading-loose">
+                        Next generation tactical cloud infrastructure for the modern digital operative. Secure. Fast. Portable.
+                    </p>
+</div>
+<div>
+<h5 class="text-white font-black italic uppercase mb-6 tracking-widest">Navigation</h5>
+<ul class="flex flex-col gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+<li><a class="hover:text-primary transition-colors" href="#">Mission Brief</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Tactical Assets</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Security Cleared</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Command Center</a></li>
+</ul>
+</div>
+<div>
+<h5 class="text-white font-black italic uppercase mb-6 tracking-widest">Protocol</h5>
+<ul class="flex flex-col gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+<li><a class="hover:text-primary transition-colors" href="#">Terms of Op</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Privacy Shield</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">API Uplink</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Status: Active</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-7xl mx-auto mt-20 pt-8 border-t border-slate-800 flex justify-between items-center">
+<p class="text-[10px] text-slate-600 font-bold tracking-[0.3em] uppercase">© 2024 CLOUD PROTOCOL V2.0 // ALL RIGHTS RESERVED</p>
+<div class="flex gap-4">
+<span class="size-2 bg-primary rounded-full animate-pulse"></span>
+<span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">System Online: North America - East</span>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

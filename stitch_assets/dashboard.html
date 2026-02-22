@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tactical Command Center - HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff4757",
+                        "background-light": "#f8f5f6",
+                        "background-dark": "#0a0505",
+                        "tactical-gray": "#1a1313",
+                        "tactical-border": "#2d1b1d",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .valorant-clip {
+            clip-path: polygon(0 0, 95% 0, 100% 15%, 100% 100%, 5% 100%, 0 85%);
+        }
+        .valorant-clip-sm {
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 71, 87, 0.03) 50%,
+                rgba(0, 0, 0, 0) 50%
+            );
+            background-size: 100% 4px;
+        }
+        .grid-bg {
+            background-image: radial-gradient(circle, #ff4757 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.05;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 selection:bg-primary/40 selection:text-white">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Background Decor -->
+<div class="fixed inset-0 grid-bg pointer-events-none"></div>
+<div class="fixed inset-0 scanlines pointer-events-none"></div>
+<!-- Top Navigation -->
+<header class="relative z-10 flex items-center justify-between border-b border-tactical-border bg-background-dark/80 backdrop-blur-md px-6 py-3">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1.5 valorant-clip-sm">
+<span class="material-symbols-outlined text-background-dark font-bold">terminal</span>
+</div>
+<div class="flex flex-col leading-none">
+<h2 class="text-xl font-bold tracking-widest text-primary uppercase">System HUD</h2>
+<span class="text-[10px] tracking-tighter text-primary/60 font-medium">V.2.4.08 PROTOCOL</span>
+</div>
+</div>
+<div class="hidden md:flex h-8 w-[1px] bg-tactical-border"></div>
+<div class="hidden lg:flex items-center gap-4 text-xs tracking-[0.2em] font-bold text-slate-400">
+<span class="flex items-center gap-1.5">
+<span class="size-2 rounded-full bg-primary animate-pulse"></span>
+                        NETWORK HEALTH: <span class="text-slate-100">STABLE</span>
+</span>
+<span class="text-tactical-border">|</span>
+<span class="flex items-center gap-1.5">
+                        LATENCY: <span class="text-primary font-mono uppercase tracking-normal">12ms</span>
+</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden sm:block">
+<input class="w-48 bg-tactical-gray/50 border-tactical-border focus:ring-1 focus:ring-primary focus:border-primary text-xs tracking-widest uppercase py-1.5 px-4 rounded-lg placeholder:text-slate-600 transition-all" placeholder="CMD_SEARCH" type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="size-9 flex items-center justify-center bg-tactical-gray border border-tactical-border hover:bg-primary/20 hover:border-primary text-slate-400 hover:text-primary transition-colors valorant-clip-sm">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="size-9 flex items-center justify-center bg-tactical-gray border border-tactical-border hover:bg-primary/20 hover:border-primary text-slate-400 hover:text-primary transition-colors valorant-clip-sm">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-4 border-l border-tactical-border">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold tracking-widest text-slate-100 uppercase">CYPHER_01</p>
+<p class="text-[10px] text-primary font-bold uppercase">ADMINISTRATOR</p>
+</div>
+<div class="size-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center overflow-hidden">
+<img alt="User Profile" class="size-full object-cover" data-alt="Cyberpunk character portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp8ibZaccd9hem3dkH0qzX_YbX5UGNpLhzUYJlDqyKNDx8bDkpxI8-B4mEpJcf0tvBOBOmt9bpyR0CHssadfG4o0kD1kqkQxQIXoncpS0qYvyll4uGbeqPRYLRywnqtbxgiLeXJNZXxphk0H9xzxJNbQZKoHSueon-yP_Z_WWJh7gwP9NwText6EHl6383BtrG8e3nBewin18AcBlwbu6GVRTQE7OcrUENwPWt5m7C0SsdyIlYHLhvaLP0SBG_AQSUNOhDXlyDKPdj"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Tactical Sidebar -->
+<aside class="relative z-10 w-64 border-r border-tactical-border bg-background-dark/60 flex flex-col p-4 gap-8">
+<div class="flex flex-col gap-1.5">
+<p class="text-[10px] font-bold text-slate-600 tracking-[0.3em] uppercase pl-4 mb-2">Navigation</p>
+<nav class="flex flex-col gap-1">
+<a class="group flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary border-r-2 border-primary" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-bold tracking-[0.15em] uppercase">Dashboard</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">hub</span>
+<span class="text-sm font-bold tracking-[0.15em] uppercase">Network Map</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">folder_open</span>
+<span class="text-sm font-bold tracking-[0.15em] uppercase">Files</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">data_object</span>
+<span class="text-sm font-bold tracking-[0.15em] uppercase">Logs</span>
+</a>
+<a class="group flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-slate-100 hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[22px]">shield</span>
+<span class="text-sm font-bold tracking-[0.15em] uppercase">Security</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto flex flex-col gap-4 p-4 bg-tactical-gray/50 rounded-xl border border-tactical-border">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">System Load</span>
+<span class="text-[10px] font-bold text-primary">82%</span>
+</div>
+<div class="h-1.5 w-full bg-tactical-border rounded-full overflow-hidden flex gap-1">
+<div class="h-full bg-primary w-1/4"></div>
+<div class="h-full bg-primary w-1/4"></div>
+<div class="h-full bg-primary w-1/4"></div>
+<div class="h-full bg-slate-700 w-1/4"></div>
+</div>
+<p class="text-[10px] text-slate-500 font-medium italic">Protocol encryption active.</p>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-6 flex flex-col gap-6 relative">
+<!-- Performance Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Connection Status -->
+<div class="bg-tactical-gray border border-tactical-border valorant-clip p-5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-4xl">wifi_tethering</span>
+</div>
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Connection</p>
+<h3 class="text-2xl font-bold text-slate-100 tracking-tight uppercase group-hover:text-primary transition-colors">Online</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="text-[10px] px-2 py-0.5 bg-primary/20 text-primary font-bold rounded">SECURE</span>
+<span class="text-[10px] text-slate-500 font-mono">192.168.1.1</span>
+</div>
+</div>
+<!-- Signal Strength -->
+<div class="bg-tactical-gray border border-tactical-border valorant-clip p-5 relative overflow-hidden group">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Signal strength</p>
+<h3 class="text-2xl font-bold text-slate-100 tracking-tight uppercase">98.4<span class="text-primary text-lg">%</span></h3>
+<div class="mt-4 flex items-end gap-1 h-3">
+<div class="flex-1 h-full bg-primary"></div>
+<div class="flex-1 h-full bg-primary"></div>
+<div class="flex-1 h-full bg-primary"></div>
+<div class="flex-1 h-full bg-primary"></div>
+<div class="flex-1 h-2 bg-slate-700"></div>
+</div>
+</div>
+<!-- Latency -->
+<div class="bg-tactical-gray border border-tactical-border valorant-clip p-5 relative overflow-hidden group">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Network Latency</p>
+<h3 class="text-2xl font-bold text-slate-100 tracking-tight uppercase">12<span class="text-primary text-sm tracking-normal font-mono ml-1">MS</span></h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-sm">trending_down</span>
+<span class="text-[10px] text-green-500 font-bold uppercase tracking-widest">-5% STABLE</span>
+</div>
+</div>
+<!-- Uptime -->
+<div class="bg-tactical-gray border border-tactical-border valorant-clip p-5 relative overflow-hidden group">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Active Session</p>
+<h3 class="text-2xl font-bold text-slate-100 tracking-tight uppercase font-mono tracking-tighter">48:12:05</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="size-2 bg-primary rounded-full animate-ping"></span>
+<span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Protocol uptime</span>
+</div>
+</div>
+</div>
+<!-- Network Traffic Graph Section -->
+<div class="flex-1 flex flex-col gap-4 bg-tactical-gray/40 border border-tactical-border rounded-xl p-6 relative">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<h2 class="text-xl font-bold text-slate-100 tracking-widest uppercase flex items-center gap-2">
+<span class="size-1.5 bg-primary"></span>
+                                Network Traffic Flow
+                            </h2>
+<p class="text-xs text-slate-500 uppercase font-medium mt-1 tracking-widest">Real-time throughput analysis</p>
+</div>
+<div class="flex items-center gap-4 bg-background-dark/80 p-3 rounded-lg border border-tactical-border">
+<div class="flex flex-col px-4 border-r border-tactical-border">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Current</span>
+<span class="text-lg font-bold text-primary font-mono tracking-tighter">452.5 MB/S</span>
+</div>
+<div class="flex flex-col px-4">
+<span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Peak</span>
+<span class="text-lg font-bold text-slate-100 font-mono tracking-tighter">892.1 MB/S</span>
+</div>
+</div>
+</div>
+<!-- Graph Visualization -->
+<div class="flex-1 relative mt-4 min-h-[300px]">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 400">
+<defs>
+<lineargradient id="neonGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#ff4757" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#ff4757" stop-opacity="0"></stop>
+</lineargradient>
+<filter id="neonGlow">
+<fegaussianblur result="coloredBlur" stddeviation="3"></fegaussianblur>
+<femerge>
+<femergenode in="coloredBlur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+</defs>
+<!-- Grid Lines -->
+<line stroke="#2d1b1d" stroke-width="1" x1="0" x2="1000" y1="100" y2="100"></line>
+<line stroke="#2d1b1d" stroke-width="1" x1="0" x2="1000" y1="200" y2="200"></line>
+<line stroke="#2d1b1d" stroke-width="1" x1="0" x2="1000" y1="300" y2="300"></line>
+<!-- Area Fill -->
+<path d="M0 350 L50 320 L100 360 L150 280 L200 300 L250 150 L300 180 L350 120 L400 240 L450 200 L500 100 L550 150 L600 80 L650 120 L700 40 L750 100 L800 60 L850 140 L900 100 L950 160 L1000 140 L1000 400 L0 400 Z" fill="url(#neonGradient)"></path>
+<!-- Data Path -->
+<path d="M0 350 L50 320 L100 360 L150 280 L200 300 L250 150 L300 180 L350 120 L400 240 L450 200 L500 100 L550 150 L600 80 L650 120 L700 40 L750 100 L800 60 L850 140 L900 100 L950 160 L1000 140" fill="none" filter="url(#neonGlow)" stroke="#ff4757" stroke-width="3"></path>
+<!-- White Accents -->
+<path d="M0 350 L50 320 L100 360 L150 280 L200 300 L250 150 L300 180 L350 120 L400 240 L450 200 L500 100 L550 150 L600 80 L650 120 L700 40 L750 100 L800 60 L850 140 L900 100 L950 160 L1000 140" fill="none" opacity="0.5" stroke="white" stroke-dasharray="5,5" stroke-width="1"></path>
+</svg>
+<!-- Legend/Labels -->
+<div class="absolute inset-y-0 left-0 flex flex-col justify-between py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest -translate-x-4">
+<span>1GB/s</span>
+<span>500MB/s</span>
+<span>0MB/s</span>
+</div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-tactical-border mt-4">
+<div class="flex gap-4">
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">12:00</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">12:15</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">12:30</span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">12:45</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-1.5 bg-primary rounded-full"></div>
+<span class="text-[10px] font-bold text-slate-100 uppercase tracking-widest">Live Feed Protocol</span>
+</div>
+</div>
+</div>
+<!-- Footer Stats -->
+<div class="flex flex-wrap gap-4 mt-auto">
+<div class="flex-1 min-w-[200px] bg-background-dark/80 border border-tactical-border p-4 flex items-center justify-between valorant-clip-sm">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Load Balancer</span>
+<span class="text-sm font-bold text-slate-100 uppercase">A-North Cluster</span>
+</div>
+<span class="text-xs font-bold text-green-500 tracking-widest uppercase">Active</span>
+</div>
+<div class="flex-1 min-w-[200px] bg-background-dark/80 border border-tactical-border p-4 flex items-center justify-between valorant-clip-sm">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Encryption</span>
+<span class="text-sm font-bold text-slate-100 uppercase">AES-256 Protocol</span>
+</div>
+<span class="material-symbols-outlined text-primary text-sm">lock</span>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
