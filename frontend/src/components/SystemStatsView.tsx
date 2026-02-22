@@ -11,6 +11,7 @@ interface SystemStats {
 }
 
 const SystemStatsView: React.FC = () => {
+    const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     const navigate = useNavigate();
     const [stats, setStats] = useState<SystemStats | null>(null);
 
@@ -24,7 +25,7 @@ const SystemStatsView: React.FC = () => {
                     return;
                 }
 
-                const res = await axios.get('http://localhost:8000/api/fs/stats', {
+                const res = await axios.get(`${API}/api/fs/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

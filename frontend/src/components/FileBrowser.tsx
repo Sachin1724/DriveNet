@@ -8,7 +8,7 @@ interface ActivityEntry { name: string; action: string; time: number; size: numb
 type Tab = 'dashboard' | 'allfiles' | 'recent' | 'shared';
 type ViewMode = 'list' | 'grid';
 
-const API = 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // In-memory blob cache: path → objectURL (kept until page refresh)
 const blobCache = new Map<string, string>();

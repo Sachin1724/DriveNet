@@ -4,6 +4,7 @@ import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 
 const Login: React.FC = () => {
+    const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const isAgentMode = searchParams.get('agent') === 'true';
@@ -37,7 +38,7 @@ const Login: React.FC = () => {
     const handleGoogleSuccess = async (credentialResponse: any) => {
         setError('');
         try {
-            const res = await axios.post('http://localhost:8000/api/auth/login', {
+            const res = await axios.post(`${API}/api/auth/login`, {
                 google_token: credentialResponse.credential
             });
             if (res.data.token) {
