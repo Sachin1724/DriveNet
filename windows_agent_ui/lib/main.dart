@@ -20,7 +20,7 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
-    title: 'DriveNet Agent',
+    title: 'Drive Net Client',
   );
 
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -38,7 +38,7 @@ class DriveSyncApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DriveNet Agent',
+      title: 'Drive Net Client',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF0D0D14),
         colorScheme: const ColorScheme.dark(
@@ -81,14 +81,14 @@ class _TrayManagerState extends State<TrayManager> with WindowListener {
     try {
       // Use .ico file for Windows system tray
       await _systemTray.initSystemTray(
-        title: 'DriveNet',
+        title: 'Drive Net Client',
         iconPath: 'assets/icon.ico',
-        toolTip: 'DriveNet Agent — Click to open',
+        toolTip: 'Drive Net Client — Click to open',
       );
 
       final menu = Menu();
       await menu.buildFrom([
-        MenuItemLabel(label: 'DriveNet Agent', enabled: false),
+        MenuItemLabel(label: 'Drive Net Client', enabled: false),
         MenuSeparator(),
         MenuItemLabel(label: 'Open', onClicked: (_) => _showWindow()),
         MenuItemLabel(label: 'Exit', onClicked: (_) => _exitApp()),

@@ -23,7 +23,7 @@ class TunnelClient {
     if (_isConnected) return;
 
     final prefs = await SharedPreferences.getInstance();
-    const cloudUrl = 'ws://localhost:8000';
+    const cloudUrl = 'https://drivenet-broker.onrender.com';
     String agentId = prefs.getString('agent_id') ?? 'desktop-node-01';
 
     try {
