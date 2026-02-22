@@ -12,14 +12,6 @@ const app = express();
 const server = createServer(app);
 
 app.use(cors());
-
-// Normalize double-slashes in URLs caused by bad frontend environment configs (e.g. `https://render.com//api/...` -> `.../api/...`)
-app.use((req, res, next) => {
-    if (req.url.includes('//')) {
-        req.url = req.url.replace(/\/+/g, '/');
-    }
-    next();
-});
 app.use(express.json({ limit: '50gb' }));
 app.use(express.urlencoded({ limit: '50gb', extended: true }));
 

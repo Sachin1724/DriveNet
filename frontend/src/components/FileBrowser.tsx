@@ -8,7 +8,8 @@ interface ActivityEntry { name: string; action: string; time: number; size: numb
 type Tab = 'dashboard' | 'allfiles' | 'recent' | 'shared';
 type ViewMode = 'list' | 'grid';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const RAW_API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API = RAW_API.endsWith('/') ? RAW_API.slice(0, -1) : RAW_API;
 
 // In-memory blob cache: path → objectURL (kept until page refresh)
 const blobCache = new Map<string, string>();
