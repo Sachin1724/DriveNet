@@ -23,11 +23,12 @@ class TunnelClient {
     if (_isConnected) return;
 
     final prefs = await SharedPreferences.getInstance();
-    const cloudUrl = 'https://drivenet-broker.onrender.com';
+    final brokerBaseUrl = prefs.getString('broker_url') ?? 'https://drivenet-broker.onrender.com';
+    final cloudWsUrl = brokerBaseUrl.replaceAll('http://', 'ws://').replaceAll('https://', 'wss://');
     String agentId = prefs.getString('agent_id') ?? 'desktop-node-01';
 
     try {
-      final wsUrl = Uri.parse(cloudUrl);
+      final wsUrl = Uri.parse(cloudWsUrl);
       final ws = await WebSocket.connect(
         wsUrl.toString(),
         headers: {

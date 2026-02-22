@@ -42,6 +42,8 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
   bool _autoRefresh = true;
   bool _startOnBoot = true;
   int _refreshInterval = 5;
+  String _dashboardUrl = 'https://drivenet.vercel.app';
+  String _brokerUrl = 'https://drivenet-broker.onrender.com';
 
   @override
   void initState() {
@@ -73,12 +75,16 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
     final savedDrive = prefs.getString('selected_drive');
     _autoRefresh = prefs.getBool('auto_refresh') ?? true;
     _startOnBoot = prefs.getBool('start_on_boot') ?? true;
+    final dashUrl = prefs.getString('dashboard_url') ?? 'https://drivenet.vercel.app';
+    final brokUrl = prefs.getString('broker_url') ?? 'https://drivenet-broker.onrender.com';
 
     final rawDrives = await DriveService.getWindowsDrives();
     final detailedDrives = await DriveService.getDriveDetails(rawDrives);
 
     setState(() {
       _userEmail = email;
+      _dashboardUrl = dashUrl;
+      _brokerUrl = brokUrl;
       _drives = detailedDrives;
       _selectedDrive = savedDrive ?? (detailedDrives.isNotEmpty ? detailedDrives[0]['name'] : null);
       _isOnline = prefs.getBool('is_online') ?? false;
@@ -113,7 +119,8 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
       client.connectionTimeout = const Duration(seconds: 3);
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('drivenet_jwt') ?? '';
-      final req = await client.getUrl(Uri.parse('https://drivenet-broker.onrender.com/api/fs/stats'));
+      final brokerUrl = prefs.getString('broker_url') ?? 'https://drivenet-broker.onrender.com';
+      final req = await client.getUrl(Uri.parse('$brokerUrl/api/fs/stats'));
       req.headers.set('Authorization', 'Bearer $token');
       final res = await req.close();
       final body = await res.transform(utf8.decoder).join();
@@ -607,8 +614,8 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
                   ]),
                   const SizedBox(height: 12),
                   _infoRow('DRIVE PATH', '$_selectedDrive\\'),
-                  _infoRow('ACCESSIBLE AT', 'https://drivenet.vercel.app/dashboard'),
-                  _infoRow('BACKEND SOCKET', 'wss://drivenet-broker.onrender.com'),
+                  _infoRow('ACCESSIBLE AT', '$_dashboardUrl/dashboard'),
+                  _infoRow('BACKEND SOCKET', _brokerUrl.replaceAll('http://', 'ws://').replaceAll('https://', 'wss://')),
                 ]),
               ),
             const SizedBox(height: 16),
@@ -817,9 +824,9 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
           ]),
           const SizedBox(height: 16),
           _configSection('NETWORK SETTINGS', [
-            _configInfoRow('Backend API URL', 'https://drivenet-broker.onrender.com'),
+            _configInfoRow('Backend API URL', _brokerUrl),
             _configInfoRow('Local IPC Port', 'N/A (NATIVE DART)'),
-            _configInfoRow('WebSocket Path', 'wss://drivenet-broker.onrender.com'),
+            _configInfoRow('WebSocket Path', _brokerUrl.replaceAll('http://', 'ws://').replaceAll('https://', 'wss://')),
             _configInfoRow('Agent ID', 'desktop-node-01'),
           ]),
           const SizedBox(height: 16),

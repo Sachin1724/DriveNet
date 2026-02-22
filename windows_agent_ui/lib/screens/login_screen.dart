@@ -19,6 +19,25 @@ class _LoginScreenState extends State<LoginScreen> {
   String _statusCode = '// AUTH_PENDING';
   HttpServer? _callbackServer;
 
+  final _dashboardController = TextEditingController(text: 'https://drivenet.vercel.app');
+  final _brokerController = TextEditingController(text: 'https://drivenet-broker.onrender.com');
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedUrls();
+  }
+
+  Future<void> _loadSavedUrls() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _dashboardController.text = prefs.getString('dashboard_url') ?? 'https://drivenet.vercel.app';
+        _brokerController.text = prefs.getString('broker_url') ?? 'https://drivenet-broker.onrender.com';
+      });
+    }
+  }
+
   @override
   void dispose() {
     _callbackServer?.close(force: true);
@@ -40,7 +59,15 @@ class _LoginScreenState extends State<LoginScreen> {
       // Open the web frontend login page in the browser
       // The web frontend will handle the Google OAuth and save the JWT to localStorage
       // We redirect the user to a special deep-link URL that our local server will intercept
-      final loginUrl = Uri.parse('https://drivenet.vercel.app/login?agent=true');
+      
+      final dashboardUrl = _dashboardController.text.trim().replaceAll(RegExp(r'/$'), '');
+      final brokerUrl = _brokerController.text.trim().replaceAll(RegExp(r'/$'), '');
+      
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('dashboard_url', dashboardUrl);
+      await prefs.setString('broker_url', brokerUrl);
+
+      final loginUrl = Uri.parse('$dashboardUrl/login?agent=true');
       await launchUrl(loginUrl, mode: LaunchMode.externalApplication);
 
       setState(() {
@@ -241,7 +268,35 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 24),
+                      TextField(
+                        controller: _dashboardController,
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'Courier'),
+                        decoration: InputDecoration(
+                          labelText: 'VERCEL DASHBOARD URL',
+                          labelStyle: TextStyle(color: Colors.grey[500], fontSize: 10, letterSpacing: 2.0),
+                          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+                          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF4655))),
+                          filled: true,
+                          fillColor: const Color(0xFF0D0D14),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _brokerController,
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontFamily: 'Courier'),
+                        decoration: InputDecoration(
+                          labelText: 'RENDER BROKER API URL',
+                          labelStyle: TextStyle(color: Colors.grey[500], fontSize: 10, letterSpacing: 2.0),
+                          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.white10)),
+                          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF4655))),
+                          filled: true,
+                          fillColor: const Color(0xFF0D0D14),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
 
                       // Google Sign-In Button
                       SizedBox(
