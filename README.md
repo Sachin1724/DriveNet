@@ -11,7 +11,7 @@
   <p><b>A highly-secure, multi-tenant cloud tunnel to access your personal Windows file system from anywhere in the world.</b></p>
   
   <h3>
-    🌐 <a href="https://drive-78uot98tz-sachin1724s-projects.vercel.app">Access the Web Dashboard</a> &nbsp; | &nbsp; 
+    🌐 <a href="https://drive-net.vercel.app/">Access the Web Dashboard</a> &nbsp; | &nbsp; 
     💻 <a href="https://github.com/Sachin1724/DriveNet/raw/main/releases/DriveNet_Setup_v1.0.0.exe">Download Windows Agent Setup</a>
   </h3>
   <br />
