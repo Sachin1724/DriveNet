@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 import '../services/drive_service.dart';
 import '../services/backend_service.dart';
 import '../services/tunnel_client.dart';
+import '../main.dart' show StartupService;
 import 'login_screen.dart';
 
 class DriveScreen extends StatefulWidget {
@@ -32,8 +33,11 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
   final SystemTray _systemTray = SystemTray();
   final AppWindow _appWindow = AppWindow();
 
-  // Refresh timer for connection status indicator
+  // Boot + auto-connect
+  bool _startOnBoot = false;
   Timer? _statusTimer;
+  Timer? _autoConnectTimer;  // Pings broker until internet comes up, then goes online
+  bool _autoConnectDone = false;
 
   @override
   void initState() {
@@ -45,12 +49,15 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
     _statusTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       if (mounted) setState(() {});
     });
+    // Auto-connect loop: every 8s try internet, go online if connected
+    _startAutoConnectLoop();
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
     _statusTimer?.cancel();
+    _autoConnectTimer?.cancel();
     super.dispose();
   }
 
@@ -63,6 +70,7 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
     final savedDrive = prefs.getString('selected_drive');
     final brokerUrl = prefs.getString('broker_url') ?? 'https://drivenet-broker.onrender.com';
     final isOnline = prefs.getBool('is_online') ?? false;
+    final startOnBoot = await StartupService.isEnabled();
 
     final rawDrives = await DriveService.getWindowsDrives();
     final detailedDrives = await DriveService.getDriveDetails(rawDrives);
@@ -73,11 +81,66 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
       _drives = detailedDrives;
       _selectedDrive = savedDrive ?? (detailedDrives.isNotEmpty ? detailedDrives[0]['name'] : null);
       _isOnline = isOnline;
+      _startOnBoot = startOnBoot;
       _isLoading = false;
     });
 
+    // If the user was online last session, auto-connect will handle reconnection
     if (isOnline && _selectedDrive != null) {
       BackendService.syncConfig().catchError((e) => debugPrint('Auto-sync error: $e'));
+    }
+  }
+
+  /// Periodically pings the cloud broker. Once internet is reachable AND
+  /// the user had a drive set, silently calls _goOnline().
+  void _startAutoConnectLoop() {
+    _autoConnectTimer = Timer.periodic(const Duration(seconds: 8), (_) async {
+      if (_autoConnectDone || !mounted) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final wasOnline = prefs.getBool('is_online') ?? false;
+      final hasDrive = _selectedDrive != null;
+      final hasToken = (prefs.getString('drivenet_jwt') ?? '').isNotEmpty;
+
+      if (!wasOnline || !hasDrive || !hasToken) return; // nothing to auto-connect
+
+      // Try a lightweight HTTP ping to the broker
+      try {
+        final client = HttpClient()..connectionTimeout = const Duration(seconds: 4);
+        final req = await client.getUrl(Uri.parse('$_brokerUrl/api/health'));
+        final resp = await req.close();
+        await resp.drain<void>();
+        // Broker is reachable — go online silently
+        if (resp.statusCode == 200 && mounted && !_isOnline && !_goingOnline) {
+          debugPrint('[DriveNet] Internet detected — auto-connecting...');
+          _autoConnectDone = true; // only auto-connect once per session
+          await _goOnline();
+          // Update tray tooltip
+          _updateTrayOnlineStatus();
+        }
+      } catch (_) {
+        // Not connected yet — will retry next tick
+        debugPrint('[DriveNet] Waiting for internet...');
+      }
+    });
+  }
+
+  void _updateTrayOnlineStatus() {
+    try {
+      _systemTray.setToolTip(
+        _isOnline
+            ? 'DriveNet — $_selectedDrive\\ ONLINE'
+            : 'DriveNet — Offline',
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _setStartOnBoot(bool enable) async {
+    setState(() => _startOnBoot = enable);
+    if (enable) {
+      await StartupService.enable();
+    } else {
+      await StartupService.disable();
     }
   }
 
@@ -526,6 +589,32 @@ class _DriveScreenState extends State<DriveScreen> with WindowListener {
 
         _statusRow(Icons.open_in_browser, 'ACCESS FROM ANY DEVICE', webUrl,
             const Color(0xFF137FEC), subtitle: 'Open in browser on any network — log in with same Gmail'),
+        const SizedBox(height: 12),
+
+        // Start on Boot toggle
+        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          Container(
+            width: 32, height: 32,
+            decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+            child: const Center(child: Icon(Icons.power_settings_new, color: Colors.purple, size: 16)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('START ON BOOT', style: TextStyle(color: Colors.grey[600], fontSize: 9, letterSpacing: 2, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 2),
+            Text(
+              _startOnBoot ? 'Auto-starts & goes online when Windows boots' : 'Off — launch manually',
+              style: TextStyle(color: Colors.grey[700], fontSize: 9),
+            ),
+          ])),
+          Switch(
+            value: _startOnBoot,
+            onChanged: _setStartOnBoot,
+            activeColor: Colors.purple,
+            inactiveThumbColor: Colors.grey[700],
+            inactiveTrackColor: Colors.white10,
+          ),
+        ]),
       ]),
     );
   }

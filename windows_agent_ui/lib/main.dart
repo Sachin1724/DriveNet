@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:system_tray/system_tray.dart';
@@ -10,6 +11,10 @@ import 'screens/drive_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Detect if launched at boot (--minimized flag set by registry startup entry)
+  final args = Platform.executableArguments;
+  final startMinimized = args.contains('--minimized');
+
   // Initialize window manager FIRST
   await windowManager.ensureInitialized();
 
@@ -20,16 +25,50 @@ void main() async {
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
-    title: 'Drive Net Client',
+    title: 'DriveNet Agent',
   );
 
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.setPreventClose(true); // We handle close ourselves
-    await windowManager.show();
-    await windowManager.focus();
+    await windowManager.setPreventClose(true);
+    if (startMinimized) {
+      // Boot start: hide window, only show tray icon
+      await windowManager.hide();
+    } else {
+      await windowManager.show();
+      await windowManager.focus();
+    }
   });
 
   runApp(const DriveSyncApp());
+}
+
+/// Registers / removes the app in the Windows startup registry key.
+/// HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+class StartupService {
+  static Future<void> enable() async {
+    final exe = Platform.resolvedExecutable;
+    // --minimized = start silently in tray on boot
+    final cmd = '"$exe" --minimized';
+    await Process.run('powershell', [
+      '-NoProfile', '-NonInteractive', '-Command',
+      'Set-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" -Name "DriveNetAgent" -Value \'$cmd\'',
+    ]);
+  }
+
+  static Future<void> disable() async {
+    await Process.run('powershell', [
+      '-NoProfile', '-NonInteractive', '-Command',
+      'Remove-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" -Name "DriveNetAgent" -ErrorAction SilentlyContinue',
+    ]);
+  }
+
+  static Future<bool> isEnabled() async {
+    final result = await Process.run('powershell', [
+      '-NoProfile', '-NonInteractive', '-Command',
+      '(Get-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run" -Name "DriveNetAgent" -ErrorAction SilentlyContinue)."DriveNetAgent" -ne \$null',
+    ]);
+    return result.stdout.toString().trim() == 'True';
+  }
 }
 
 class DriveSyncApp extends StatelessWidget {
