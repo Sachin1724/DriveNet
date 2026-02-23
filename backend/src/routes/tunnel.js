@@ -7,6 +7,42 @@ const router = express.Router();
 // Secure all file system routes
 router.use(authenticateToken);
 
+// ─── DRIVE IDENTITY ROUTES ───────────────────────────────────────────────────
+
+// GET /api/me/agent — Returns the drive assigned to the logged-in Gmail account + online status
+// This is the key endpoint: email = primary key → drive + status
+router.get('/me/agent', (req, res) => {
+    const agentId = req.user?.g_uid || req.user?.user;
+    if (!agentId) return res.status(401).json({ error: 'Unidentified User' });
+    const info = tunnelBroker.getAgentInfo(agentId);
+    if (!info) {
+        return res.json({ online: false, drive: null, email: req.user?.user, message: 'No Windows agent has ever connected for this account.' });
+    }
+    return res.json(info);
+});
+
+// POST /api/me/register-drive — Windows agent calls this when going online to register its drive letter
+// Body: { drive: "D:\\" }
+router.post('/me/register-drive', express.json(), (req, res) => {
+    const agentId = req.user?.g_uid || req.user?.user;
+    if (!agentId) return res.status(401).json({ error: 'Unidentified User' });
+    const { drive } = req.body;
+    if (!drive) return res.status(400).json({ error: 'drive field required' });
+    const existing = tunnelBroker.agentInfo.get(agentId) || {};
+    tunnelBroker.agentInfo.set(agentId, {
+        ...existing,
+        email: req.user?.user,
+        agentId,
+        drive,
+        online: tunnelBroker.agents.has(agentId),
+        lastSeen: new Date().toISOString(),
+    });
+    console.log(`[DriveNet] Drive registered: ${req.user?.user} → ${drive}`);
+    return res.json({ ok: true, drive, online: tunnelBroker.agents.has(agentId) });
+});
+
+// ─── FILE SYSTEM PROXY ROUTES (forwarded through WebSocket tunnel) ────────────
+
 // Proxy these HTTP requests down the WebSocket tunnel to the Desktop Agent
 router.get('/list', tunnelBroker.createProxyHandler('fs:list'));
 router.post('/folder', tunnelBroker.createProxyHandler('fs:mkdir'));

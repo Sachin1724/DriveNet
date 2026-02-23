@@ -11,11 +11,13 @@ class TunnelClient {
   static bool _isConnected = false;
   static bool _shouldReconnect = true;
   static Timer? _reconnectTimer;
+  static int _reconnectAttempts = 0;
 
   static bool get isConnected => _isConnected;
 
   static Future<void> start(String token) async {
     _shouldReconnect = true;
+    _reconnectAttempts = 0;
     await _connect(token);
   }
 
@@ -23,6 +25,7 @@ class TunnelClient {
     if (_isConnected) return;
 
     final prefs = await SharedPreferences.getInstance();
+    // Always use the deployed cloud backend — this works from ANY network in the world
     final brokerBaseUrl = prefs.getString('broker_url') ?? 'https://drivenet-broker.onrender.com';
     final cloudWsUrl = brokerBaseUrl.replaceAll('http://', 'ws://').replaceAll('https://', 'wss://');
     String agentId = prefs.getString('agent_id') ?? 'desktop-node-01';
@@ -39,7 +42,8 @@ class TunnelClient {
       
       _channel = IOWebSocketChannel(ws);
       _isConnected = true;
-      debugPrint('[DriveNet Agent] Connected to Cloud Broker directly from Flutter.');
+      _reconnectAttempts = 0; // Reset on successful connect
+      debugPrint('[DriveNet Agent] Connected to Cloud Broker: $cloudWsUrl');
 
       _channel!.stream.listen(
         (message) async {
@@ -86,6 +90,7 @@ class TunnelClient {
         onError: (err) {
           debugPrint('[DriveNet Agent] WS Error: $err');
           _isConnected = false;
+          _scheduleReconnect(token);
         },
       );
     } catch (e) {
@@ -95,19 +100,25 @@ class TunnelClient {
     }
   }
 
+  // Exponential backoff: 5s → 15s → 30s → 60s (max) to avoid hammering server
   static void _scheduleReconnect(String token) {
     if (!_shouldReconnect) return;
     _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(const Duration(seconds: 5), () {
+    _reconnectAttempts++;
+    final seconds = [5, 15, 30, 60][(_reconnectAttempts - 1).clamp(0, 3)];
+    debugPrint('[DriveNet Agent] Reconnecting in ${seconds}s (attempt $_reconnectAttempts)...');
+    _reconnectTimer = Timer(Duration(seconds: seconds), () {
       _connect(token);
     });
   }
 
   static void stop() {
     _shouldReconnect = false;
+    _reconnectAttempts = 0;
     _reconnectTimer?.cancel();
     _channel?.sink.close();
     _channel = null;
     _isConnected = false;
   }
 }
+

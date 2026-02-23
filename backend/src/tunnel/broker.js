@@ -4,8 +4,15 @@ import jwt from 'jsonwebtoken';
 
 class TunnelBroker {
     constructor() {
-        this.agents = new Map(); // Store connected Electron desktop agents
-        this.pendingRequests = new Map(); // Store HTTP requests waiting for agent response
+        this.agents = new Map();       // agentId → WebSocket (live connections)
+        this.pendingRequests = new Map(); // requestId → pending HTTP response
+        // Persists drive info per user even after disconnect — email is the primary key
+        this.agentInfo = new Map();    // agentId → { email, drive, online, lastSeen }
+    }
+
+    // Called by /api/me/agent route — returns drive info for the logged-in user
+    getAgentInfo(agentId) {
+        return this.agentInfo.get(agentId) || null;
     }
 
     init(server) {
@@ -45,6 +52,16 @@ class TunnelBroker {
             console.log(`[DriveNet] Agent Connected & Authenticated for User: ${decoded.user} (AgentID: ${agentId})`);
 
             this.agents.set(agentId, ws);
+
+            // Track this agent's email and online status — email is the primary key
+            const existing = this.agentInfo.get(agentId) || {};
+            this.agentInfo.set(agentId, {
+                ...existing,
+                email: decoded.user,
+                agentId,
+                online: true,
+                lastSeen: new Date().toISOString(),
+            });
 
             ws.on('message', (message) => {
                 let data;
@@ -108,6 +125,9 @@ class TunnelBroker {
             ws.on('close', () => {
                 console.log(`[DriveNet] Agent Disconnected: ${agentId}`);
                 this.agents.delete(agentId);
+                // Mark offline but keep the drive record so web can show last known drive
+                const info = this.agentInfo.get(agentId);
+                if (info) this.agentInfo.set(agentId, { ...info, online: false, lastSeen: new Date().toISOString() });
             });
         });
     }

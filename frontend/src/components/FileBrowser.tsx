@@ -35,6 +35,8 @@ const FileBrowser: React.FC = () => {
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [filter, setFilter] = useState('');
     const [gridCache, setGridCache] = useState<{ [path: string]: string }>({}); // thumb URLs
+    // Drive identity — email is the primary key, this shows which drive is assigned to logged-in Gmail
+    const [agentInfo, setAgentInfo] = useState<{ drive: string | null; online: boolean; lastSeen?: string } | null>(null);
 
     // Preview
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -56,6 +58,14 @@ const FileBrowser: React.FC = () => {
         const token = localStorage.getItem('drivenet_token');
         return { Authorization: `Bearer ${token}` };
     }, []);
+
+    // Fetches drive assignment for the logged-in Gmail — email is the primary key
+    const fetchAgentInfo = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API}/api/fs/me/agent`, { headers: authHeader() });
+            if (res.data) setAgentInfo(res.data);
+        } catch { /* silent */ }
+    }, [authHeader]);
 
     const addActivity = useCallback((entry: ActivityEntry) => {
         setActivity(prev => {
@@ -99,10 +109,12 @@ const FileBrowser: React.FC = () => {
         }
         fetchFiles('');
         fetchStats();
+        fetchAgentInfo(); // Load drive assignment immediately on login
 
         pollRef.current = setInterval(() => {
             fetchFiles(currentPath, true); // silent = no loading spinner
             fetchStats();
+            fetchAgentInfo(); // Keep drive status fresh
         }, 5000);
 
         return () => clearInterval(pollRef.current);
@@ -413,6 +425,35 @@ const FileBrowser: React.FC = () => {
                         <p className="text-[9px] text-slate-500 uppercase tracking-widest">{agentOnline ? 'AGENT ONLINE · SYNCED' : 'AGENT OFFLINE'}</p>
                     </div>
                 </div>
+
+                {/* Drive Identity Card — email is the primary key */}
+                {agentInfo && (
+                    <div className={`mx-3 mt-3 p-3 border text-[10px] font-mono rounded-sm ${agentInfo.online
+                            ? 'border-green-500/30 bg-green-500/5'
+                            : 'border-[#2d2d2d] bg-[#111]'
+                        }`}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                            <span className="material-symbols-outlined text-sm text-primary">storage</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Assigned Drive</span>
+                        </div>
+                        <p className="text-white font-bold text-sm mb-1">
+                            {agentInfo.drive ? agentInfo.drive.toUpperCase() : 'NO DRIVE SET'}
+                        </p>
+                        <div className="flex items-center gap-1.5">
+                            <div className={`w-1.5 h-1.5 rounded-full ${agentInfo.online ? 'bg-green-400 shadow-[0_0_6px_#4ade80]' : 'bg-slate-600'
+                                }`}></div>
+                            <span className={`text-[9px] font-bold tracking-widest ${agentInfo.online ? 'text-green-400' : 'text-slate-600'
+                                }`}>
+                                {agentInfo.online ? 'ONLINE — ACCESS GRANTED' : 'OFFLINE — OPEN WINDOWS APP'}
+                            </span>
+                        </div>
+                        {agentInfo.lastSeen && (
+                            <p className="text-slate-700 text-[8px] mt-1.5">
+                                Last seen: {new Date(agentInfo.lastSeen).toLocaleTimeString()}
+                            </p>
+                        )}
+                    </div>
+                )}
                 <nav className="flex-1 py-4 flex flex-col gap-1 px-3">
                     <NavBtn tab="dashboard" icon="dashboard" label="Dashboard" />
                     <NavBtn tab="allfiles" icon="folder_open" label="All Files" />
