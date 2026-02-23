@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import { makeRedirectUri } from 'expo-auth-session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API, GOOGLE_CLIENT_ID } from '../config';
+import { API, GOOGLE_CLIENT_ID, GOOGLE_ANDROID_CLIENT_ID } from '../config';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -13,10 +14,12 @@ export default function LoginScreen({ navigation }: any) {
     const [error, setError] = useState('');
 
     const [request, response, promptAsync] = Google.useAuthRequest({
-        androidClientId: GOOGLE_CLIENT_ID,
+        androidClientId: GOOGLE_ANDROID_CLIENT_ID,
         iosClientId: GOOGLE_CLIENT_ID,
         webClientId: GOOGLE_CLIENT_ID,
-        clientId: GOOGLE_CLIENT_ID,
+        redirectUri: makeRedirectUri({
+            scheme: 'drivenet'
+        }),
     });
 
     useEffect(() => {
@@ -52,7 +55,7 @@ export default function LoginScreen({ navigation }: any) {
                 navigation.replace('Dashboard');
             }
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Authentication Failed. Make sure your email is whitelisted.');
+            setError(err.response?.data?.error || 'Login failed. Check your connection and try again.');
             setLoading(false);
         }
     };
@@ -84,13 +87,6 @@ export default function LoginScreen({ navigation }: any) {
                         )}
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={[styles.btn, styles.devBtn]}
-                        disabled={loading}
-                        onPress={() => handleServerAuth('DEV_BYPASS')}
-                    >
-                        <Text style={styles.btnText}>DEVELOPER BYPASS (EXPO)</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -181,10 +177,5 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         letterSpacing: 2,
-    },
-    devBtn: {
-        backgroundColor: '#1a1a1a',
-        marginTop: 12,
-        borderLeftColor: '#ff4655',
     }
 });

@@ -23,6 +23,7 @@ const Landing: React.FC = () => {
                             <a className="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors text-white" href="#">Features</a>
                             <a className="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors text-white" href="#">Security</a>
                             <a className="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors text-white" href="#">Docs</a>
+                            <a className="text-xs font-bold tracking-[0.2em] uppercase hover:text-primary transition-colors text-white" href="https://github.com/Sachin1724/DriveNet.git" target="_blank" rel="noopener noreferrer">GitHub</a>
                         </nav>
                         <div className="flex items-center gap-6">
                             <button
@@ -63,6 +64,13 @@ const Landing: React.FC = () => {
                                         <span className="relative z-10">CONNECT NODE</span>
                                         <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-xl">bolt</span>
                                     </button>
+                                    <a
+                                        href="#"
+                                        className="group relative px-10 py-4 bg-background-light/10 text-primary border border-primary/40 font-black italic tracking-widest btn-slanted overflow-hidden transition-all hover:bg-primary/20 hover:pr-14 flex items-center justify-center"
+                                    >
+                                        <span className="relative z-10">DOWNLOAD AGENT (.EXE)</span>
+                                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all text-xl">download</span>
+                                    </a>
                                 </div>
                             </div>
                             <div className="relative group">
@@ -123,8 +131,9 @@ const Landing: React.FC = () => {
                     </section>
                 </main>
 
-                <footer className="bg-background-dark border-t border-slate-800 py-10 px-6 lg:px-20 text-center">
+                <footer className="bg-background-dark border-t border-slate-800 py-10 px-6 lg:px-20 text-center flex flex-col items-center gap-2">
                     <p className="text-[10px] text-slate-600 font-bold tracking-[0.3em] uppercase">© 2026 DRIVENET PROTOCOL V2.0 // ALL RIGHTS RESERVED</p>
+                    <p className="text-[10px] text-primary/80 font-bold tracking-[0.2em] uppercase mt-2">CONTRIBUTOR: SACHIDANANDA MALLICK</p>
                 </footer>
             </div>
         </div>

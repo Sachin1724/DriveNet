@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Modal, TextInput } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 import { API } from '../config';
 import FilePreviewModal from './FilePreviewModal';
 
@@ -26,6 +27,11 @@ export default function AllFilesTab() {
     const [previewType, setPreviewType] = useState<'image' | 'video' | 'pdf' | 'text' | null>(null);
     const [previewText, setPreviewText] = useState<string>('');
     const [videoQuality, setVideoQuality] = useState<'original' | 'low'>('original');
+
+    const [promptVisible, setPromptVisible] = useState(false);
+    const [promptType, setPromptType] = useState<'folder' | 'rename'>('folder');
+    const [promptText, setPromptText] = useState('');
+    const [targetItem, setTargetItem] = useState<FileItem | null>(null);
 
     useEffect(() => {
         fetchFiles(currentPath);
@@ -54,6 +60,95 @@ export default function AllFilesTab() {
         const k = 1024, sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const handleUpload = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({ copyToCacheDirectory: true });
+            if (result.canceled) return;
+
+            const file = result.assets[0];
+            const uploadId = file.uri;
+            setLoading(true);
+
+            const base64 = await FileSystem.readAsStringAsync(file.uri, { encoding: 'base64' });
+            const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
+            const headers = await authHeader();
+
+            if (base64.length === 0) {
+                await axios.post(`${API}/api/fs/upload_chunk`, {
+                    uploadId, path: currentPath, name: file.name, chunk: '', isFirst: true, isLast: true
+                }, { headers });
+            } else {
+                for (let i = 0; i < base64.length; i += CHUNK_SIZE) {
+                    const chunk = base64.substring(i, i + CHUNK_SIZE);
+                    const isFirst = i === 0;
+                    const isLast = (i + CHUNK_SIZE) >= base64.length;
+                    await axios.post(`${API}/api/fs/upload_chunk`, {
+                        uploadId, path: currentPath, name: file.name, chunk, isFirst, isLast
+                    }, { headers });
+                }
+            }
+            fetchFiles(currentPath);
+        } catch (e) {
+            Alert.alert('Upload Error', 'Failed to upload file');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = (item: FileItem) => {
+        Alert.alert('Delete', `Are you sure you want to delete ${item.name}?`, [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Delete', style: 'destructive', onPress: async () => {
+                    setLoading(true);
+                    try {
+                        const headers = await authHeader();
+                        const reqPath = currentPath ? `${currentPath}/${item.name}` : item.name;
+                        await axios.delete(`${API}/api/fs/delete`, { headers, data: { items: [reqPath] } });
+                        fetchFiles(currentPath);
+                    } catch {
+                        Alert.alert('Error', 'Failed to delete');
+                        setLoading(false);
+                    }
+                }
+            }
+        ]);
+    };
+
+    const handlePromptSubmit = async () => {
+        if (!promptText.trim()) return;
+        setPromptVisible(false);
+        setLoading(true);
+        try {
+            const headers = await authHeader();
+            if (promptType === 'folder') {
+                const reqPath = currentPath ? `${currentPath}/${promptText}` : promptText;
+                await axios.post(`${API}/api/fs/folder`, { path: reqPath }, { headers });
+            } else if (promptType === 'rename' && targetItem) {
+                const oldPath = currentPath ? `${currentPath}/${targetItem.name}` : targetItem.name;
+                const newPath = currentPath ? `${currentPath}/${promptText}` : promptText;
+                await axios.post(`${API}/api/fs/rename`, { oldPath, newPath }, { headers });
+            }
+            fetchFiles(currentPath);
+        } catch {
+            Alert.alert('Error', 'Action failed');
+            setLoading(false);
+        }
+    };
+
+    const openRename = (item: FileItem) => {
+        setTargetItem(item);
+        setPromptText(item.name);
+        setPromptType('rename');
+        setPromptVisible(true);
+    };
+
+    const openNewFolder = () => {
+        setPromptText('');
+        setPromptType('folder');
+        setPromptVisible(true);
     };
 
     const navigateUp = () => {
@@ -127,24 +222,42 @@ export default function AllFilesTab() {
     };
 
     const renderItem = ({ item }: { item: FileItem }) => (
-        <TouchableOpacity style={styles.fileRow} onPress={() => handleFileClick(item)}>
-            <Text style={styles.icon}>{item.is_dir ? '📁' : '📄'}</Text>
-            <View style={styles.fileInfo}>
-                <Text style={styles.fileName} numberOfLines={1}>{item.name}</Text>
-                <Text style={styles.fileMeta}>
-                    {item.is_dir ? 'DIR' : formatSize(item.size)} • {new Date(item.modified).toLocaleDateString()}
-                </Text>
+        <View style={styles.fileRow}>
+            <TouchableOpacity style={styles.fileRowBtn} onPress={() => handleFileClick(item)}>
+                <Text style={styles.icon}>{item.is_dir ? '📁' : '📄'}</Text>
+                <View style={styles.fileInfo}>
+                    <Text style={styles.fileName} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.fileMeta}>
+                        {item.is_dir ? 'DIR' : formatSize(item.size)} • {new Date(item.modified).toLocaleDateString()}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+            <View style={styles.actions}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => openRename(item)}>
+                    <Text style={styles.actionText}>✎</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => handleDelete(item)}>
+                    <Text style={styles.actionText}>✕</Text>
+                </TouchableOpacity>
             </View>
-        </TouchableOpacity>
+        </View>
     );
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.pathTitle}>PATH: /{currentPath}</Text>
-                <TouchableOpacity style={styles.refreshBtn} onPress={() => fetchFiles(currentPath)}>
-                    <Text style={styles.refreshText}>REFRESH</Text>
-                </TouchableOpacity>
+                <Text style={styles.pathTitle} numberOfLines={1} ellipsizeMode={'head'}>/{currentPath || 'ROOT'}</Text>
+                <View style={styles.headerActions}>
+                    <TouchableOpacity style={styles.refreshBtn} onPress={openNewFolder}>
+                        <Text style={styles.refreshText}>+ FOLD</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.refreshBtn} onPress={handleUpload}>
+                        <Text style={styles.refreshText}>↑ UPL</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.refreshBtn} onPress={() => fetchFiles(currentPath)}>
+                        <Text style={styles.refreshText}>↻</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {currentPath ? (
@@ -181,6 +294,30 @@ export default function AllFilesTab() {
                 videoQuality={videoQuality}
                 onQualityChange={previewType === 'video' ? updateVideoQuality : undefined}
             />
+
+            <Modal visible={promptVisible} transparent animationType="fade">
+                <View style={styles.modalBg}>
+                    <View style={styles.promptBox}>
+                        <Text style={styles.promptTitle}>{promptType === 'folder' ? 'NEW FOLDER' : 'RENAME'}</Text>
+                        <TextInput
+                            style={styles.promptInput}
+                            value={promptText}
+                            onChangeText={setPromptText}
+                            autoFocus
+                            placeholder="Enter name"
+                            placeholderTextColor="#666"
+                        />
+                        <View style={styles.promptRow}>
+                            <TouchableOpacity style={styles.promptBtn} onPress={() => setPromptVisible(false)}>
+                                <Text style={styles.promptBtnText}>CANCEL</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.promptBtn, { borderLeftColor: '#ff4655' }]} onPress={handlePromptSubmit}>
+                                <Text style={styles.promptBtnText}>CONFIRM</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -276,4 +413,75 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         letterSpacing: 2,
     },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    actionBtn: {
+        padding: 12,
+        marginLeft: 4,
+    },
+    actionText: {
+        color: '#64748b',
+        fontSize: 18,
+    },
+    fileRowBtn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    modalBg: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+    },
+    promptBox: {
+        backgroundColor: '#1a1a1a',
+        width: '100%',
+        borderRadius: 8,
+        padding: 24,
+        borderWidth: 1,
+        borderColor: '#333',
+    },
+    promptTitle: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
+        letterSpacing: 2,
+        marginBottom: 16,
+    },
+    promptInput: {
+        backgroundColor: '#0e0e0e',
+        color: '#fff',
+        borderWidth: 1,
+        borderColor: '#333',
+        padding: 12,
+        borderRadius: 4,
+        marginBottom: 24,
+    },
+    promptRow: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 12,
+    },
+    promptBtn: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: '#333',
+        backgroundColor: '#0e0e0e',
+        marginLeft: 8,
+    },
+    promptBtnText: {
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+    }
 });

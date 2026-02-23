@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 // Tabs
 import AllFilesTab from '../components/AllFilesTab';
 import RecentTab from '../components/RecentTab';
+import SystemStatsTab from '../components/SystemStatsTab';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,12 +36,26 @@ export default function DashboardScreen({ navigation }: any) {
             <Tab.Screen
                 name="All Files"
                 component={AllFilesTab}
-                options={{ title: 'DRIVE: ROOT' }}
+                options={{
+                    title: 'DRIVE: ROOT',
+                    tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" size={size} color={color} />
+                }}
             />
             <Tab.Screen
                 name="Recent"
                 component={RecentTab}
-                options={{ title: 'ACTIVITY LOG' }}
+                options={{
+                    title: 'ACTIVITY LOG',
+                    tabBarIcon: ({ color, size }) => <Ionicons name="time" size={size} color={color} />
+                }}
+            />
+            <Tab.Screen
+                name="Stats"
+                component={SystemStatsTab}
+                options={{
+                    title: 'SYSTEM TELEMETRY',
+                    tabBarIcon: ({ color, size }) => <Ionicons name="pulse" size={size} color={color} />
+                }}
             />
         </Tab.Navigator>
     );
