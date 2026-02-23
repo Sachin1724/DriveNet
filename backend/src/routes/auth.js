@@ -14,9 +14,11 @@ router.post('/login', async (req, res) => {
     const { username, password, google_token } = req.body;
 
     // 1. Check if it's a Google Auth login attempt
-    if (google_token === 'DEV_BYPASS') {
-        const token = jwt.sign({ user: 'developer@drivenet.local', g_uid: 'dev_01' }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
-        return res.json({ token, user: 'developer@drivenet.local' });
+    if (google_token && google_token.startsWith('DEV_BYPASS')) {
+        const email = google_token.includes(':') ? google_token.split(':')[1] : 'developer@drivenet.local';
+        const g_uid = email; // use email as g_uid for bypass matching 
+        const token = jwt.sign({ user: email, g_uid }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
+        return res.json({ token, user: email });
     }
 
     if (google_token) {
