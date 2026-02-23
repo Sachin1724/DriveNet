@@ -9,16 +9,22 @@ router.use(authenticateToken);
 
 // ─── DRIVE IDENTITY ROUTES ───────────────────────────────────────────────────
 
-// GET /api/me/agent — Returns the drive assigned to the logged-in Gmail account + online status
-// This is the key endpoint: email = primary key → drive + status
+// GET /api/me/agent — Returns the drive assigned to the logged-in Gmail account + LIVE online status
+// IMPORTANT: online is always checked from the live WebSocket agents Map, never from cache.
 router.get('/me/agent', (req, res) => {
     const agentId = req.user?.g_uid || req.user?.user;
     if (!agentId) return res.status(401).json({ error: 'Unidentified User' });
+
+    // Always check the live WebSocket connection — never trust the cached online value
+    const liveOnline = tunnelBroker.agents.has(agentId);
     const info = tunnelBroker.getAgentInfo(agentId);
+
     if (!info) {
-        return res.json({ online: false, drive: null, email: req.user?.user, message: 'No Windows agent has ever connected for this account.' });
+        return res.json({ online: false, drive: null, email: req.user?.user });
     }
-    return res.json(info);
+
+    // Return drive info from cache (persists across disconnects) but online from LIVE map
+    return res.json({ ...info, online: liveOnline });
 });
 
 // POST /api/me/register-drive — Windows agent calls this when going online to register its drive letter
