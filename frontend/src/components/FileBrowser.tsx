@@ -98,7 +98,7 @@ const FileBrowser: React.FC = () => {
         } catch { setAgentOnline(false); }
     }, [authHeader]);
 
-    // Real-time polling every 5s
+    // Real-time polling every 2s for fast sync
     useEffect(() => {
         const token = localStorage.getItem('drivenet_token');
         if (token) {
@@ -109,22 +109,25 @@ const FileBrowser: React.FC = () => {
         }
         fetchFiles('');
         fetchStats();
-        fetchAgentInfo(); // Load drive assignment immediately on login
+        fetchAgentInfo();
 
+        // File + stats: every 2s for fast sync
         pollRef.current = setInterval(() => {
-            fetchFiles(currentPath, true); // silent = no loading spinner
+            fetchFiles(currentPath, true);
             fetchStats();
-            fetchAgentInfo(); // Keep drive status fresh
-        }, 5000);
+        }, 2000);
 
-        return () => clearInterval(pollRef.current);
+        // Drive status: every 3s (changes rarely, no need to hammer)
+        const agentPoll = setInterval(() => fetchAgentInfo(), 3000);
+
+        return () => { clearInterval(pollRef.current); clearInterval(agentPoll); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Restart poll whenever path changes
+    // Restart file poll whenever path changes (2s)
     useEffect(() => {
         clearInterval(pollRef.current);
-        pollRef.current = setInterval(() => fetchFiles(currentPath, true), 5000);
+        pollRef.current = setInterval(() => fetchFiles(currentPath, true), 2000);
         return () => clearInterval(pollRef.current);
     }, [currentPath, fetchFiles]);
 
@@ -429,8 +432,8 @@ const FileBrowser: React.FC = () => {
                 {/* Drive Identity Card — email is the primary key */}
                 {agentInfo && (
                     <div className={`mx-3 mt-3 p-3 border text-[10px] font-mono rounded-sm ${agentInfo.online
-                            ? 'border-green-500/30 bg-green-500/5'
-                            : 'border-[#2d2d2d] bg-[#111]'
+                        ? 'border-green-500/30 bg-green-500/5'
+                        : 'border-[#2d2d2d] bg-[#111]'
                         }`}>
                         <div className="flex items-center gap-1.5 mb-2">
                             <span className="material-symbols-outlined text-sm text-primary">storage</span>
