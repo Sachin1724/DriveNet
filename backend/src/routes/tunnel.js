@@ -14,6 +14,7 @@ router.delete('/delete', tunnelBroker.createProxyHandler('fs:delete'));
 router.get('/stats', tunnelBroker.createProxyHandler('sys:stats'));
 
 router.get('/download', tunnelBroker.createProxyHandler('fs:download'));
+router.get('/video', tunnelBroker.createProxyHandler('fs:stream'));
 router.get('/thumbnail', tunnelBroker.createProxyHandler('fs:thumbnail'));
 
 router.post('/upload_chunk', express.json({ limit: '10mb' }), tunnelBroker.createProxyHandler('fs:upload_chunk'));

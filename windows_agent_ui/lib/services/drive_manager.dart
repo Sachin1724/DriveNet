@@ -41,6 +41,9 @@ class DriveManager {
       case 'fs:download':
         await _downloadFile(payload['path'] as String?, wsSend, requestId);
         return null;
+      case 'fs:stream':
+        await _streamFile(payload['path'] as String?, payload['headers'] as Map<String, dynamic>?, wsSend, requestId);
+        return null;
       case 'fs:thumbnail':
         return await _getThumbnail(payload['path'] as String?, wsSend, requestId);
       case 'sys:stats':
@@ -160,6 +163,109 @@ class DriveManager {
     await for (final chunk in stream) {
       buffer.addAll(chunk);
       if (buffer.length >= chunkSize) {
+        wsSend({
+          'requestId': requestId,
+          'payload': {
+            'type': 'chunk',
+            'data': base64Encode(buffer),
+          }
+        });
+        buffer.clear();
+      }
+    }
+    
+    if (buffer.isNotEmpty) {
+      wsSend({
+        'requestId': requestId,
+        'payload': {
+          'type': 'chunk',
+          'data': base64Encode(buffer),
+        }
+      });
+    }
+
+    wsSend({
+      'requestId': requestId,
+      'payload': {
+        'type': 'end',
+      }
+    });
+  }
+
+  static Future<void> _streamFile(String? filePath, Map<String, dynamic>? headers, void Function(Map<String, dynamic>) wsSend, String requestId) async {
+    if (filePath == null) throw Exception('File path required');
+    final target = await _getSafePath(filePath);
+    final file = File(target);
+    if (!await file.exists()) {
+      wsSend({
+        'requestId': requestId,
+        'error': 'File not found'
+      });
+      return;
+    }
+    
+    final fileSize = await file.length();
+    final rangeHeader = headers?['range']?.toString();
+    
+    int start = 0;
+    int end = fileSize - 1;
+    bool isPartial = false;
+
+    if (rangeHeader != null && rangeHeader.startsWith('bytes=')) {
+      final rangeStr = rangeHeader.substring(6).split('-');
+      if (rangeStr[0].isNotEmpty) start = int.parse(rangeStr[0]);
+      if (rangeStr.length > 1 && rangeStr[1].isNotEmpty) {
+        end = int.parse(rangeStr[1]);
+      }
+      isPartial = true;
+    }
+
+    if (start >= fileSize || end >= fileSize || start > end) {
+      wsSend({
+        'requestId': requestId,
+        'payload': {
+          'type': 'start',
+          'statusCode': 416,
+          'headers': {
+            'Content-Range': 'bytes */$fileSize'
+          }
+        }
+      });
+      wsSend({'requestId': requestId, 'payload': {'type': 'end'}});
+      return;
+    }
+
+    final chunkLength = end - start + 1;
+    // Cap chunk length to prevent sending too much data at once over WS. Browsers will request more.
+    final maxChunkLength = 1024 * 1024 * 5; // 5MB limit per range request
+    int actualEnd = end;
+    
+    if (chunkLength > maxChunkLength) {
+      actualEnd = start + maxChunkLength - 1;
+    }
+    final contentLength = actualEnd - start + 1;
+
+    wsSend({
+      'requestId': requestId,
+      'payload': {
+        'type': 'start',
+        'statusCode': isPartial ? 206 : 200,
+        'headers': {
+          'Content-Range': 'bytes $start-$actualEnd/$fileSize',
+          'Accept-Ranges': 'bytes',
+          'Content-Length': contentLength.toString(),
+          'Content-Type': 'video/mp4', // Default to video/mp4, though the browser usually knows by looking at the first chunk
+        }
+      }
+    });
+
+    final stream = file.openRead(start, actualEnd + 1);
+    List<int> buffer = [];
+    const packetSize = 1024 * 512; // 512KB packets
+    
+    await for (final chunk in stream) {
+      buffer.addAll(chunk);
+      if (buffer.length >= packetSize) {
         wsSend({
           'requestId': requestId,
           'payload': {

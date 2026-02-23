@@ -64,11 +64,20 @@ class TunnelBroker {
                                 if (!res.headersSent) res.status(500).json({ error: data.error });
                                 this.pendingRequests.delete(data.requestId);
                             } else if (data.payload && data.payload.type === 'start') {
-                                res.setHeader('Content-Disposition', `attachment; filename="${data.payload.filename || 'download.bin'}"`);
-                                if (data.payload.size !== undefined) {
-                                    res.setHeader('Content-Length', data.payload.size);
+                                if (data.payload.statusCode) {
+                                    res.status(data.payload.statusCode);
                                 }
-                                res.setHeader('Content-Type', 'application/octet-stream');
+                                if (data.payload.headers) {
+                                    Object.entries(data.payload.headers).forEach(([key, value]) => {
+                                        res.setHeader(key, value);
+                                    });
+                                } else {
+                                    res.setHeader('Content-Disposition', `attachment; filename="${data.payload.filename || 'download.bin'}"`);
+                                    if (data.payload.size !== undefined) {
+                                        res.setHeader('Content-Length', data.payload.size);
+                                    }
+                                    res.setHeader('Content-Type', 'application/octet-stream');
+                                }
                             } else if (data.payload && data.payload.type === 'chunk') {
                                 res.write(Buffer.from(data.payload.data, 'base64'));
                             } else if (data.payload && data.payload.type === 'end') {
@@ -150,7 +159,7 @@ class TunnelBroker {
                 ws.send(JSON.stringify({
                     requestId,
                     action,
-                    payload: { ...req.body, ...req.query, ...req.params }
+                    payload: { ...req.body, ...req.query, ...req.params, headers: req.headers }
                 }));
 
                 // Timeout after 30 seconds

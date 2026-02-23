@@ -163,10 +163,19 @@ const FileBrowser: React.FC = () => {
             setPreviewLoading(true);
             setPreviewName(file.name);
             setPreviewUrl(null);
-            setPreviewType(isImage(file.name) ? 'image' : isVideo(file.name) ? 'video' : 'pdf');
-            const url = await getOrFetchBlob(rel);
-            setPreviewUrl(url);
-            setPreviewLoading(false);
+
+            const isVid = isVideo(file.name);
+            setPreviewType(isImage(file.name) ? 'image' : isVid ? 'video' : 'pdf');
+
+            if (isVid) {
+                const token = localStorage.getItem('drivenet_token') || '';
+                setPreviewUrl(`${API}/api/fs/video?path=${encodeURIComponent(rel)}&token=${token}`);
+                setPreviewLoading(false);
+            } else {
+                const url = await getOrFetchBlob(rel);
+                setPreviewUrl(url);
+                setPreviewLoading(false);
+            }
         } else {
             // Download directly
             const url = await getOrFetchBlob(rel);
