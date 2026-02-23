@@ -34,7 +34,6 @@ const FileBrowser: React.FC = () => {
     const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('list');
     const [filter, setFilter] = useState('');
-    const [gridCache, setGridCache] = useState<{ [path: string]: string }>({}); // thumb URLs
     // Drive identity — email is the primary key, this shows which drive is assigned to logged-in Gmail
     const [agentInfo, setAgentInfo] = useState<{ drive: string | null; online: boolean; lastSeen?: string } | null>(null);
 
@@ -224,33 +223,6 @@ const FileBrowser: React.FC = () => {
         }
     };
 
-    // Preload thumbnails for images in grid view
-    const preloadGridThumbs = useCallback(async (items: FileItem[], path: string) => {
-        const images = items.filter(f => !f.is_dir && isImage(f.name)).slice(0, 20);
-        for (const img of images) {
-            const rel = path ? `${path}/${img.name}` : img.name;
-            if (!blobCache.has(rel)) {
-                try {
-                    const res = await axios.get(`${API}/api/fs/thumbnail?path=${encodeURIComponent(rel)}`, {
-                        headers: authHeader(), responseType: 'blob'
-                    });
-                    const url = URL.createObjectURL(res.data);
-                    blobCache.set(rel, url);
-                    setGridCache(prev => ({ ...prev, [rel]: url }));
-                } catch { }
-            } else {
-                setGridCache(prev => ({ ...prev, [rel]: blobCache.get(rel)! }));
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [authHeader]);
-
-    useEffect(() => {
-        if (viewMode === 'grid' && files.length > 0) {
-            preloadGridThumbs(files, currentPath);
-        }
-    }, [viewMode, files, currentPath, preloadGridThumbs]);
-
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -355,18 +327,43 @@ const FileBrowser: React.FC = () => {
         </tr>
     );
 
+    // FileGridCard — uses direct <img src> with auth token in URL for parallel loading.
+    // Thumbnails start blurred (low quality fast) then sharpen (native browser behaviour).
+    // Clicking opens a full-quality preview.
     const FileGridCard = ({ file }: { file: FileItem }) => {
         const rel = currentPath ? `${currentPath}/${file.name}` : file.name;
-        const thumb = gridCache[rel];
+        const token = localStorage.getItem('drivenet_token') || '';
+        // Direct URL — browser fetches all grid images in parallel, no axios bottleneck
+        const thumbSrc = `${API}/api/fs/thumbnail?path=${encodeURIComponent(rel)}&token=${token}&w=240&q=60`;
+        const [imgLoaded, setImgLoaded] = React.useState(false);
+        const [imgError, setImgError] = React.useState(false);
+        const showThumb = isImage(file.name) && !imgError;
+
         return (
             <div className="bg-[#141414] border border-[#2d2d2d] hover:border-primary/40 transition-all cursor-pointer group relative overflow-hidden"
                 onClick={() => handleFileClick(file)}>
-                {/* Thumbnail or icon */}
-                <div className="h-36 bg-[#0f0f0f] flex items-center justify-center overflow-hidden">
-                    {thumb && isImage(file.name) ? (
-                        <img src={thumb} alt={file.name} className="w-full h-full object-cover" />
+                <div className="h-36 bg-[#0f0f0f] flex items-center justify-center overflow-hidden relative">
+                    {showThumb ? (
+                        <>
+                            {/* Blurred placeholder shows immediately while the real thumb loads */}
+                            {!imgLoaded && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-6 h-6 border border-slate-700 border-t-primary rounded-full animate-spin" />
+                                </div>
+                            )}
+                            <img
+                                src={thumbSrc}
+                                alt={file.name}
+                                className={`w-full h-full object-cover transition-all duration-300 ${imgLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'
+                                    }`}
+                                onLoad={() => setImgLoaded(true)}
+                                onError={() => setImgError(true)}
+                                loading="lazy"
+                            />
+                        </>
                     ) : (
-                        <span className={`material-symbols-outlined text-5xl ${file.is_dir ? 'text-primary/50' : 'text-slate-700'}`}>{fileIcon(file)}</span>
+                        <span className={`material-symbols-outlined text-5xl ${file.is_dir ? 'text-primary/50' : 'text-slate-700'
+                            }`}>{fileIcon(file)}</span>
                     )}
                 </div>
                 <div className="p-3">
