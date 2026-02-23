@@ -28,3 +28,4 @@ yarn-error.log*
 .Trashes
 ehthumbs.db
 Thumbs.db
+windows_agent_ui/assets/ffmpeg.exe

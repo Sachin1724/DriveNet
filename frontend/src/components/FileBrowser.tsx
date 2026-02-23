@@ -38,7 +38,9 @@ const FileBrowser: React.FC = () => {
 
     // Preview
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'video' | null>(null);
+    const [previewType, setPreviewType] = useState<'image' | 'pdf' | 'video' | 'text' | null>(null);
+    const [previewText, setPreviewText] = useState<string>('');
+    const [videoQuality, setVideoQuality] = useState<'original' | 'low'>('original');
     const [previewName, setPreviewName] = useState<string | null>(null);
     const [previewLoading, setPreviewLoading] = useState(false);
 
@@ -129,8 +131,9 @@ const FileBrowser: React.FC = () => {
 
     const getExt = (name: string) => name.split('.').pop()?.toLowerCase() ?? '';
     const isImage = (name: string) => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(getExt(name));
-    const isVideo = (name: string) => ['mp4', 'webm', 'mov', 'avi'].includes(getExt(name));
+    const isVideo = (name: string) => ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(getExt(name));
     const isPDF = (name: string) => getExt(name) === 'pdf';
+    const isText = (name: string) => ['txt', 'md', 'json', 'csv', 'js', 'ts', 'jsx', 'tsx', 'html', 'css', 'ini', 'yaml', 'yml'].includes(getExt(name));
 
     const fileIcon = (file: FileItem) => {
         if (file.is_dir) return 'folder';
@@ -152,6 +155,14 @@ const FileBrowser: React.FC = () => {
         } catch { return null; }
     };
 
+    useEffect(() => {
+        if (previewType === 'video' && previewName) {
+            const rel = currentPath ? `${currentPath}/${previewName}` : previewName;
+            const token = localStorage.getItem('drivenet_token') || '';
+            setPreviewUrl(`${API}/api/fs/video?path=${encodeURIComponent(rel)}&token=${token}&quality=${videoQuality}`);
+        }
+    }, [videoQuality]);
+
     const handleFileClick = async (file: FileItem) => {
         if (file.is_dir) {
             const newPath = currentPath ? `${currentPath}/${file.name}` : file.name;
@@ -159,17 +170,27 @@ const FileBrowser: React.FC = () => {
             return;
         }
         const rel = currentPath ? `${currentPath}/${file.name}` : file.name;
-        if (isImage(file.name) || isVideo(file.name) || isPDF(file.name)) {
+        if (isImage(file.name) || isVideo(file.name) || isPDF(file.name) || isText(file.name)) {
             setPreviewLoading(true);
             setPreviewName(file.name);
             setPreviewUrl(null);
+            setPreviewText('');
 
             const isVid = isVideo(file.name);
-            setPreviewType(isImage(file.name) ? 'image' : isVid ? 'video' : 'pdf');
+            const isTxt = isText(file.name);
+            setPreviewType(isImage(file.name) ? 'image' : isVid ? 'video' : isPDF(file.name) ? 'pdf' : 'text');
 
             if (isVid) {
                 const token = localStorage.getItem('drivenet_token') || '';
-                setPreviewUrl(`${API}/api/fs/video?path=${encodeURIComponent(rel)}&token=${token}`);
+                setPreviewUrl(`${API}/api/fs/video?path=${encodeURIComponent(rel)}&token=${token}&quality=${videoQuality}`);
+                setPreviewLoading(false);
+            } else if (isTxt) {
+                try {
+                    const res = await axios.get(`${API}/api/fs/download?path=${encodeURIComponent(rel)}`, {
+                        headers: authHeader(), responseType: 'text'
+                    });
+                    setPreviewText(res.data);
+                } catch { setPreviewText('Error loading document content.'); }
                 setPreviewLoading(false);
             } else {
                 const url = await getOrFetchBlob(rel);
@@ -619,7 +640,15 @@ const FileBrowser: React.FC = () => {
                     onClick={() => { setPreviewUrl(null); setPreviewType(null); setPreviewLoading(false); }}>
                     <div className="max-w-5xl max-h-[90vh] w-full relative" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">{previewName}</span>
+                            <div className="flex items-center gap-4">
+                                <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">{previewName}</span>
+                                {previewType === 'video' && (
+                                    <div className="flex bg-[#141414] border border-[#333] rounded overflow-hidden">
+                                        <button onClick={() => setVideoQuality('original')} className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors ${videoQuality === 'original' ? 'bg-primary text-white' : 'text-slate-500 hover:text-white'}`}>Original Quality</button>
+                                        <button onClick={() => setVideoQuality('low')} className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors ${videoQuality === 'low' ? 'bg-primary text-white' : 'text-slate-500 hover:text-white'}`}>Auto (Data Saver)</button>
+                                    </div>
+                                )}
+                            </div>
                             <button onClick={() => { setPreviewUrl(null); setPreviewType(null); setPreviewLoading(false); }}
                                 className="text-slate-500 hover:text-white border border-[#333] hover:border-primary px-2 py-1 transition-all">
                                 <span className="material-symbols-outlined text-sm">close</span>
@@ -637,6 +666,11 @@ const FileBrowser: React.FC = () => {
                                 {previewType === 'image' && previewUrl && <img src={previewUrl} alt={previewName ?? ''} className="max-h-[80vh] max-w-full mx-auto object-contain" />}
                                 {previewType === 'video' && previewUrl && <video src={previewUrl} controls className="max-h-[80vh] max-w-full mx-auto" autoPlay />}
                                 {previewType === 'pdf' && previewUrl && <iframe src={previewUrl} className="w-full h-[80vh]" title={previewName ?? ''} />}
+                                {previewType === 'text' && (
+                                    <div className="bg-[#141414] border border-[#333] p-6 max-h-[80vh] overflow-y-auto">
+                                        <pre className="text-xs font-mono text-slate-300 w-full whitespace-pre-wrap">{previewText}</pre>
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>

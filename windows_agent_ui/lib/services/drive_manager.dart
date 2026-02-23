@@ -42,7 +42,7 @@ class DriveManager {
         await _downloadFile(payload['path'] as String?, wsSend, requestId);
         return null;
       case 'fs:stream':
-        await _streamFile(payload['path'] as String?, payload['headers'] as Map<String, dynamic>?, wsSend, requestId);
+        await _streamFile(payload['path'] as String?, payload['headers'] as Map<String, dynamic>?, payload['quality'] as String?, wsSend, requestId);
         return null;
       case 'fs:thumbnail':
         return await _getThumbnail(payload['path'] as String?, wsSend, requestId);
@@ -192,7 +192,7 @@ class DriveManager {
     });
   }
 
-  static Future<void> _streamFile(String? filePath, Map<String, dynamic>? headers, void Function(Map<String, dynamic>) wsSend, String requestId) async {
+  static Future<void> _streamFile(String? filePath, Map<String, dynamic>? headers, String? quality, void Function(Map<String, dynamic>) wsSend, String requestId) async {
     if (filePath == null) throw Exception('File path required');
     final target = await _getSafePath(filePath);
     final file = File(target);
@@ -201,6 +201,12 @@ class DriveManager {
         'requestId': requestId,
         'error': 'File not found'
       });
+      return;
+    }
+
+    final bool useTranscode = (quality == 'low' || quality == 'auto');
+    if (useTranscode && (target.toLowerCase().endsWith('.mp4') || target.toLowerCase().endsWith('.mov') || target.toLowerCase().endsWith('.avi') || target.toLowerCase().endsWith('.webm') || target.toLowerCase().endsWith('.mkv'))) {
+      await _streamTranscode(target, wsSend, requestId);
       return;
     }
     
@@ -293,6 +299,76 @@ class DriveManager {
         'type': 'end',
       }
     });
+  }
+
+  static Future<void> _streamTranscode(String target, void Function(Map<String, dynamic>) wsSend, String requestId) async {
+    final exeDir = p.dirname(Platform.resolvedExecutable);
+    final ffmpegPath = p.join(exeDir, 'data', 'flutter_assets', 'assets', 'ffmpeg.exe');
+    final actualFfmpeg = File(ffmpegPath).existsSync() ? ffmpegPath : 'ffmpeg';
+
+    wsSend({
+      'requestId': requestId,
+      'payload': {
+        'type': 'start',
+        'statusCode': 200,
+        'headers': {
+          'Content-Type': 'video/mp4',
+        }
+      }
+    });
+
+    try {
+      final process = await Process.start(actualFfmpeg, [
+        '-i', target,
+        '-vf', 'scale=-2:480',
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',
+        '-crf', '28',
+        '-c:a', 'aac',
+        '-f', 'mp4',
+        '-movflags', 'frag_keyframe+empty_moov',
+        'pipe:1'
+      ]);
+
+      List<int> buffer = [];
+      const packetSize = 1024 * 512; // 512KB
+
+      process.stdout.listen((event) {
+        buffer.addAll(event);
+        if (buffer.length >= packetSize) {
+          wsSend({
+            'requestId': requestId,
+            'payload': {
+              'type': 'chunk',
+              'data': base64Encode(buffer),
+            }
+          });
+          buffer.clear();
+        }
+      }, onDone: () {
+        if (buffer.isNotEmpty) {
+          wsSend({
+            'requestId': requestId,
+            'payload': {
+              'type': 'chunk',
+              'data': base64Encode(buffer),
+            }
+          });
+        }
+        wsSend({
+          'requestId': requestId,
+          'payload': {
+            'type': 'end',
+          }
+        });
+      }, onError: (e) {
+        wsSend({'requestId': requestId, 'payload': {'type': 'end'}});
+      });
+
+      process.stderr.listen((_) {}); // Ignore logs
+    } catch (e) {
+      wsSend({'requestId': requestId, 'payload': {'type': 'end'}});
+    }
   }
 
   static Future<dynamic> _getThumbnail(String? filePath, void Function(Map<String, dynamic>) wsSend, String requestId) async {
