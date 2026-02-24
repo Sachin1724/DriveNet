@@ -45,7 +45,7 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _items = List<Map<String, dynamic>>.from(data['files'] ?? []);
+          _items = List<Map<String, dynamic>>.from(data['items'] ?? []);
         });
       } else {
         throw Exception(jsonDecode(response.body)['error'] ?? 'Failed to fetch files');
@@ -135,9 +135,18 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
     return '${val.toStringAsFixed(1)} ${suffixes[i]}';
   }
 
-  String _formatDate(String isoString) {
+  String _formatDate(dynamic timestamp) {
+    if (timestamp == null) return '';
     try {
-      final date = DateTime.parse(isoString).toLocal();
+      int ms;
+      if (timestamp is int) {
+        ms = timestamp;
+      } else if (timestamp is String) {
+        ms = int.tryParse(timestamp) ?? 0;
+      } else {
+        return '';
+      }
+      final date = DateTime.fromMillisecondsSinceEpoch(ms).toLocal();
       return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     } catch (_) {
       return '';
@@ -145,10 +154,10 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
   }
 
   Widget _buildFileItem(Map<String, dynamic> item) {
-    final bool isDir = item['isDirectory'] == true;
+    final bool isDir = item['is_dir'] == true;
     final String name = item['name'] ?? 'Unknown';
     final int size = item['size'] ?? 0;
-    final String date = _formatDate(item['modified'] ?? '');
+    final String date = _formatDate(item['modified']);
     
     IconData iconData = isDir ? Icons.folder : Icons.insert_drive_file;
     Color iconColor = isDir ? const Color(0xFF137FEC) : Colors.grey;
@@ -252,8 +261,8 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
                               // Sort folders first
                               final sortedItems = List<Map<String, dynamic>>.from(_items)
                                 ..sort((a, b) {
-                                  if (a['isDirectory'] && !b['isDirectory']) return -1;
-                                  if (!a['isDirectory'] && b['isDirectory']) return 1;
+                                  if (a['is_dir'] == true && b['is_dir'] != true) return -1;
+                                  if (a['is_dir'] != true && b['is_dir'] == true) return 1;
                                   return (a['name'] ?? '').compareTo(b['name'] ?? '');
                                 });
                                 
