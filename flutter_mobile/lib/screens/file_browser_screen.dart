@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FileBrowserScreen extends StatefulWidget {
   const FileBrowserScreen({super.key});
@@ -16,6 +21,7 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
   List<Map<String, dynamic>> _items = [];
   bool _isLoading = false;
   String _error = '';
+  Map<String, double> _uploadProgress = {};
 
   @override
   void initState() {
@@ -85,6 +91,184 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
     } else {
       _navigateTo('${parts.join('\\')}\\');
     }
+  }
+
+  Future<void> _uploadFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles();
+      if (result == null || result.files.isEmpty) return;
+
+      final file = File(result.files.single.path!);
+      final fileName = result.files.single.name;
+      final fileSize = await file.length();
+
+      setState(() {
+        _uploadProgress[fileName] = 0.0;
+      });
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('drivenet_jwt');
+
+      final uploadId = DateTime.now().millisecondsSinceEpoch.toString();
+      const int chunkSize = 1 * 1024 * 1024; // 1MB chunks
+      final RandomAccessFile raf = await file.open(mode: FileMode.read);
+
+      for (int i = 0; i < fileSize; i += chunkSize) {
+        final int bytesToRead = (i + chunkSize > fileSize) ? fileSize - i : chunkSize;
+        final List<int> chunk = await raf.read(bytesToRead);
+        
+        final base64Chunk = base64Encode(chunk);
+        final isFirst = i == 0;
+        final isLast = (i + bytesToRead) >= fileSize;
+
+        final response = await http.post(
+          Uri.parse('$_brokerUrl/api/fs/upload_chunk'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'uploadId': uploadId,
+            'path': _currentPath,
+            'name': fileName,
+            'chunk': base64Chunk,
+            'isFirst': isFirst,
+            'isLast': isLast,
+          }),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('Upload failed');
+        }
+
+        setState(() {
+          _uploadProgress[fileName] = (i + bytesToRead) / fileSize;
+        });
+      }
+
+      await raf.close();
+
+      setState(() {
+        _uploadProgress.remove(fileName);
+      });
+
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Uploaded: $fileName')));
+      _fetchFiles();
+
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload error: $e')));
+    }
+  }
+
+  Future<void> _downloadAndOpenFile(Map<String, dynamic> item) async {
+    final name = item['name'] as String;
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Downloading $name...')));
+    setState(() => _isLoading = true);
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('drivenet_jwt');
+      String relPath = _currentPath == '\\' ? name : '$_currentPath\\$name';
+      
+      final url = Uri.parse('$_brokerUrl/api/fs/download?path=${Uri.encodeComponent(relPath)}');
+      final response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+
+      if (response.statusCode == 200) {
+        final dir = await getApplicationDocumentsDirectory();
+        final file = File('${dir.path}/$name');
+        await file.writeAsBytes(response.bodyBytes);
+        
+        // Open file natively
+        final result = await OpenFilex.open(file.path);
+        if (result.type != ResultType.done && mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not open file: ${result.message}')));
+        }
+      } else {
+        throw Exception('Server rejected download request.');
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Download error: $e')));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _shareFile(Map<String, dynamic> item) async {
+    final name = item['name'] as String;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('drivenet_jwt');
+      String relPath = _currentPath == '\\' ? name : '$_currentPath\\$name';
+      
+      final downloadUrl = '$_brokerUrl/api/fs/download?path=${Uri.encodeComponent(relPath)}&token=$token';
+      
+      await Share.share('Check out this file from DriveNet:\n\n$downloadUrl');
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Share error: $e')));
+    }
+  }
+
+  Future<void> _deleteItem(Map<String, dynamic> item) async {
+      final name = item['name'] as String;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('drivenet_jwt');
+        String relPath = _currentPath == '\\' ? name : '$_currentPath\\$name';
+        
+        final url = Uri.parse('$_brokerUrl/api/fs/delete?path=${Uri.encodeComponent(relPath)}');
+        final response = await http.delete(url, headers: {'Authorization': 'Bearer $token'});
+        
+        if (response.statusCode == 200) {
+            _fetchFiles();
+            if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Deleted $name')));
+        } else {
+            throw Exception('Delete failed');
+        }
+      } catch (e) {
+         if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete error: $e')));
+      }
+  }
+
+  void _showFileOptions(Map<String, dynamic> item) {
+    if (item['is_dir'] == true) return; // For now, only interact with files
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF14141E),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.download, color: Colors.white),
+                title: const Text('Download & Open', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _downloadAndOpenFile(item);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share, color: Colors.white),
+                title: const Text('Share Link', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _shareFile(item);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.redAccent),
+                title: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteItem(item);
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    );
   }
 
   Widget _buildBreadcrumbs() {
@@ -198,20 +382,51 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
         newPath += '$name\\';
         _navigateTo(newPath);
       } : () {
-        // Handle file click (e.g., download or preview)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Selected: $name')),
-        );
+        _showFileOptions(item);
       },
-      trailing: const Icon(Icons.more_vert, color: Colors.grey, size: 20),
+      trailing: IconButton(
+        icon: const Icon(Icons.more_vert, color: Colors.grey, size: 20),
+        onPressed: () => _showFileOptions(item),
+      ),
+    );
+  }
+
+  Widget _buildUploadProgress() {
+    if (_uploadProgress.isEmpty) return const SizedBox.shrink();
+    return Column(
+      children: _uploadProgress.entries.map((e) {
+        return Container(
+          color: const Color(0xFF14141E),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Uploading: ${e.key}', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                    const SizedBox(height: 4),
+                    LinearProgressIndicator(value: e.value, color: const Color(0xFFFF4655), backgroundColor: Colors.grey[800]),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Text('${(e.value * 100).toStringAsFixed(0)}%', style: const TextStyle(color: Colors.white, fontSize: 12)),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildBreadcrumbs(),
+    return Scaffold(
+      backgroundColor: Colors.transparent, // inherited from dashboard
+      body: Column(
+        children: [
+          _buildBreadcrumbs(),
+          _buildUploadProgress(),
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator(color: Color(0xFFFF4655)))
@@ -272,6 +487,12 @@ class _FileBrowserScreenState extends State<FileBrowserScreen> {
                         ),
         ),
       ],
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: _uploadFile,
+      backgroundColor: const Color(0xFFFF4655),
+      child: const Icon(Icons.upload_file, color: Colors.white),
+    ),
     );
   }
 }
