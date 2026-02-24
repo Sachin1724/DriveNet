@@ -11,9 +11,11 @@ class DriveManager {
 
   static Future<String> _getRootPath() async {
     final prefs = await SharedPreferences.getInstance();
-    final drives = prefs.getStringList('selected_drives') ?? [];
-    if (drives.isNotEmpty) {
-      return '${drives.first}\\';
+    // Use the exact string key 'selected_drive' that the UI saves, not a list.
+    final drive = prefs.getString('selected_drive');
+    if (drive != null && drive.isNotEmpty) {
+      // Ensure trailing slash for Windows drives (e.g. "G:\")
+      return drive.endsWith('\\') ? drive : '$drive\\';
     }
     return 'D:\\';
   }
